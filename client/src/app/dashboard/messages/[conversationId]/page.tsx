@@ -82,11 +82,11 @@ export default function ConversationPage() {
 
         // Get messages
         const msgRes = await fetch(
-          `/api/conversations/${conversationId}/messages?page=1&limit=50`
+          `/api/messages/${conversationId}`
         );
         const msgData = await msgRes.json();
         setMessages(msgData.messages || []);
-        setHasMore((msgData.messages || []).length >= 50);
+        setHasMore(false); // Simplified for Prisma demo
 
         // Mark as read
         await fetch("/api/messages/read", {
@@ -94,6 +94,7 @@ export default function ConversationPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ conversationId }),
         });
+        socket.emit("dm_seen", { conversationId });
       } catch (err) {
         console.error(err);
       } finally {
@@ -131,6 +132,7 @@ export default function ConversationPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversationId }),
       });
+      socket.emit("dm_seen", { conversationId });
     };
 
     const handleDmTyping = ({ userId, isTyping: typing }: any) => {
@@ -170,15 +172,12 @@ export default function ConversationPage() {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     try {
-      const nextPage = page + 1;
       const res = await fetch(
-        `/api/conversations/${conversationId}/messages?page=${nextPage}&limit=50`
+        `/api/messages/${conversationId}`
       );
       const data = await res.json();
-      const older = data.messages || [];
-      if (older.length < 50) setHasMore(false);
-      setMessages((prev) => [...older, ...prev]);
-      setPage(nextPage);
+      setHasMore(false);
+      setMessages(data.messages || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -209,12 +208,28 @@ export default function ConversationPage() {
     setReplyingTo(null);
 
     try {
-      // Send via socket
+      // Save to Prisma API first
+      const res = await fetch(`/api/messages/${conversationId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      const data = await res.json();
+      
+      // Update optimistic message with real ID
+      if (data.message) {
+        setMessages((prev) => 
+          prev.map((m) => m._id === optimisticMsg._id ? { ...m, _id: data.message._id } : m)
+        );
+      }
+
+      // Broadcast via socket for real-time delivery
       socket.emit("dm_send", {
         conversationId,
         content,
         type: "text",
         replyTo: replyingTo?._id || null,
+        messageId: data.message?._id
       });
     } catch (err) {
       console.error(err);
@@ -569,21 +584,31 @@ export default function ConversationPage() {
         </AnimatePresence>
 
         {/* Typing Indicator */}
-        {isTyping && (
-          <motion.div
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 ml-10"
-          >
-            <div className="bg-spider-white/20 px-4 py-2 rounded-2xl rounded-bl-md border border-white/10">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-spider-white/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-2 h-2 bg-spider-white/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-2 h-2 bg-spider-white/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+        <AnimatePresence>
+          {isTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className="flex items-center gap-2 mt-2"
+            >
+              {/* Partner's Avatar */}
+              <img
+                src={partner?.avatar || "/spider.png"}
+                alt=""
+                className="w-8 h-8 rounded-full border-2 border-black bg-spider-red object-cover mr-2 shrink-0"
+              />
+              <div className="bg-spider-white text-spider-black px-4 py-2.5 rounded-2xl rounded-bl-md border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                <div className="flex gap-1.5 items-center h-4">
+                  <span className="w-1.5 h-1.5 bg-spider-black/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 bg-spider-black/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 bg-spider-black/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
               </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div ref={messagesEndRef} />
       </div>

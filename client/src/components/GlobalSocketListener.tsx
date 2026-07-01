@@ -45,12 +45,27 @@ export default function GlobalSocketListener() {
           icon: "/spider.png", // WebVerse icon
         });
       }
+
+      // Dispatch event to light up Messages icon
+      window.dispatchEvent(new Event('webverse_new_message'));
+    };
+
+    const handleNotification = (data: any) => {
+      addToast({
+        type: "success",
+        title: "New Alert",
+        message: data.message || "You have a new notification",
+      });
+      // Dispatch DOM event to trigger bell in layout
+      window.dispatchEvent(new Event('webverse_new_notification'));
     };
 
     socket.on("dm_receive", handleDmReceive);
+    socket.on("notification", handleNotification);
 
     return () => {
       socket.off("dm_receive", handleDmReceive);
+      socket.off("notification", handleNotification);
     };
   }, [user, pathname, addToast, router]);
 

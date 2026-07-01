@@ -31,16 +31,14 @@ export default function FriendsPage() {
   };
 
   const openChat = (friendId: string) => {
-    if (!user) return;
-    // Generate deterministic room ID for DM
-    const roomId = [user.id, friendId].sort().join("_");
-    router.push(`/room/${roomId}`);
+    // Route to the new Dashboard Chat System for 1-on-1 DMs
+    router.push(`/dashboard/messages/${friendId}`);
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto w-full h-full">
-      <h1 className="text-5xl font-bebas text-spider-white mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
-        YOUR ALLIES
+    <div className="p-4 md:p-8 max-w-4xl mx-auto w-full h-full">
+      <h1 className="text-4xl md:text-5xl font-bebas text-spider-white mb-6 md:mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+        YOUR MULTIVERSE SQUAD
       </h1>
 
       {loading ? (
@@ -54,9 +52,9 @@ export default function FriendsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               key={friend.id}
-              className="comic-panel p-4 bg-spider-white text-spider-black flex items-center justify-between"
+              className="comic-panel p-4 bg-spider-white text-spider-black flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div className="w-12 h-12 shrink-0 bg-spider-red text-white rounded-full flex items-center justify-center border-2 border-black font-bebas text-2xl">
                   {friend.username.charAt(0).toUpperCase()}
                 </div>
@@ -68,7 +66,7 @@ export default function FriendsPage() {
               
               <button
                 onClick={() => openChat(friend.id)}
-                className="flex items-center gap-2 px-4 py-2 font-bebas text-xl bg-spider-blue text-white border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-transform"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 font-bebas text-xl border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-transform bg-spider-blue text-white hover:bg-spider-black hover:-translate-y-1 active:translate-y-0 active:shadow-none"
               >
                 <MessageSquare size={20} /> OPEN CHAT
               </button>

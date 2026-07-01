@@ -1,122 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJson, updateJson, IConversation, IUser } from "@/lib/jsonDb";
-import { verifyAuthToken } from "@/lib/auth";
-import { sanitizeInput } from "@/lib/sanitize";
-
-const generateObjectId = () => Array.from({length: 24}, () => Math.floor(Math.random()*16).toString(16)).join('');
-
-interface ConversationDbFile {
-  conversations: IConversation[];
-  messages: any[];
-}
+import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/jwt";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get("auth_token")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const payload = await verifyAuthToken(token);
-    const userId = payload.userId;
+    const decoded = verifyToken(token) as any;
+    if (!decoded || !decoded.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const db = readJson<ConversationDbFile>("messages.json");
-    const users = readJson<IUser[]>("users.json");
+    const userId = decoded.id;
 
-    // Filter conversations where participants contains userId
-    const myConversations = db.conversations.filter(c => c.participants.includes(userId));
-
-    // Populate participants
-    const populated = myConversations.map(c => {
-      const participantsInfo = c.participants.map(pId => {
-        const u = users.find(user => user._id === pId);
-        return u ? {
-          _id: u._id,
-          username: u.username,
-          displayName: u.displayName,
-          avatar: u.avatar,
-          isOnline: u.isOnline,
-          lastSeen: u.lastSeen
-        } : null;
-      }).filter(Boolean);
-
-      return {
-        ...c,
-        participants: participantsInfo
-      };
+    // Fetch all accepted friends
+    const friends = await prisma.user.findMany({
+      where: {
+        OR: [
+          { sentRequests: { some: { receiverId: userId, status: "accepted" } } },
+          { receivedRequests: { some: { senderId: userId, status: "accepted" } } }
+        ]
+      },
+      select: { id: true, username: true, displayName: true, avatar: true }
     });
 
-    // Sort by lastMessageAt descending
-    populated.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
-
-    return NextResponse.json({ conversations: populated });
-  } catch (error) {
-    console.error("Fetch conversations error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }
-}
-
-export async function POST(req: NextRequest) {
-  try {
-    const token = req.cookies.get("auth_token")?.value;
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const payload = await verifyAuthToken(token);
-    const userId = payload.userId;
-    
-    const rawBody = await req.json();
-    const { targetUserId } = sanitizeInput(rawBody);
-
-    if (userId === targetUserId) {
-      return NextResponse.json({ error: "Cannot create conversation with yourself" }, { status: 400 });
-    }
-
-    const db = readJson<ConversationDbFile>("messages.json");
-    const users = readJson<IUser[]>("users.json");
-
-    // Find existing
-    let conversation = db.conversations.find(c => 
-      c.participants.includes(userId) && c.participants.includes(targetUserId) && c.participants.length === 2
-    );
-
-    if (!conversation) {
-      const newId = generateObjectId();
-      const newConv: IConversation = {
-        _id: newId,
-        participants: [userId, targetUserId],
-        unreadCounts: { [userId]: 0, [targetUserId]: 0 },
-        lastMessageAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      updateJson<ConversationDbFile>("messages.json", (current) => {
-        current.conversations.push(newConv);
-        return current;
+    const conversations = await Promise.all(friends.map(async (friend) => {
+      const roomId = [userId, friend.id].sort().join("_");
+      
+      const lastMessage = await prisma.message.findFirst({
+        where: { roomId },
+        orderBy: { createdAt: "desc" }
       });
 
-      conversation = newConv;
-    }
+      // Mock unread count since we can't push schema changes right now
+      const unreadCount = (lastMessage && lastMessage.senderId === friend.id) ? 1 : 0;
 
-    // Populate participants
-    const populatedParticipants = conversation.participants.map(pId => {
-      const u = users.find(user => user._id === pId);
-      return u ? {
-        _id: u._id,
-        username: u.username,
-        displayName: u.displayName,
-        avatar: u.avatar,
-        isOnline: u.isOnline,
-        lastSeen: u.lastSeen
-      } : null;
-    }).filter(Boolean);
+      return {
+        _id: friend.id,
+        participants: [
+          { _id: userId, username: decoded.username },
+          { _id: friend.id, username: friend.username, displayName: friend.displayName, avatar: friend.avatar, isOnline: true }
+        ],
+        lastMessage: lastMessage?.content || null,
+        lastMessageAt: lastMessage?.createdAt || null,
+        unreadCounts: { [userId]: unreadCount } 
+      };
+    }));
 
-    const populatedConversation = {
-      ...conversation,
-      participants: populatedParticipants
-    };
+    conversations.sort((a, b) => {
+      if (!a.lastMessageAt) return 1;
+      if (!b.lastMessageAt) return -1;
+      return new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime();
+    });
 
-    return NextResponse.json({ conversation: populatedConversation });
+    return NextResponse.json({ conversations });
   } catch (error) {
-    console.error("Create conversation error:", error);
+    console.error("Fetch conversations error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

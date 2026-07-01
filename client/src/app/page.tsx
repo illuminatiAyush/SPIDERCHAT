@@ -18,8 +18,12 @@ export default function LandingPage() {
   const { user, logout } = useAuth();
 
   const handleCreateRoom = () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
     setIsCreating(true);
-    socket.auth = { username: user?.username, userId: user?.id };
+    socket.auth = { username: user.username, userId: user.id };
     socket.connect();
     socket.emit("create_room");
   };
@@ -29,8 +33,15 @@ export default function LandingPage() {
       router.push(`/join?code=${roomCode}`);
     });
 
+    socket.on("connect_error", (err) => {
+      console.error("Socket connection failed:", err.message);
+      setIsCreating(false);
+      alert("Failed to connect to the server. Please try again.");
+    });
+
     return () => {
       socket.off("room_created");
+      socket.off("connect_error");
     };
   }, [router]);
 
@@ -147,7 +158,7 @@ export default function LandingPage() {
         <section className="mt-32 w-full">
           <div className="flex justify-center flex-wrap gap-4 mb-12">
             <GlitchText text="HOW IT" textColorClass="text-spider-red" className="text-5xl md:text-6xl" />
-            <GlitchText text="WORKS" textColorClass="text-spider-white" className="text-5xl md:text-6xl" />
+            <GlitchText text="WORKS" textColorClass="text-spider-red" className="text-5xl md:text-6xl" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-spider-white text-spider-black p-6 comic-panel rotate-1">

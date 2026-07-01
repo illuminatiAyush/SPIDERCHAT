@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, UserPlus } from "lucide-react";
+import { socket } from "@/lib/socket";
 
 export default function ExplorePage() {
   const [query, setQuery] = useState("");
@@ -48,7 +49,13 @@ export default function ExplorePage() {
         body: JSON.stringify({ receiverId: userId }),
       });
       
-      if (!res.ok) {
+      if (res.ok) {
+        socket.emit("send_notification", {
+          receiverId: userId,
+          type: "friend_request",
+          message: "Someone sent you a friend request!"
+        });
+      } else {
         // Revert on failure
         setSentRequests((prev) => ({ ...prev, [userId]: false }));
       }
@@ -59,8 +66,8 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto w-full h-full">
-      <h1 className="text-5xl font-bebas text-spider-white mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto w-full h-full">
+      <h1 className="text-4xl md:text-5xl font-bebas text-spider-white mb-6 md:mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
         EXPLORE THE MULTIVERSE
       </h1>
 
@@ -86,9 +93,9 @@ export default function ExplorePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             key={user.id}
-            className="comic-panel p-4 bg-spider-white text-spider-black flex items-center justify-between"
+            className="comic-panel p-4 bg-spider-white text-spider-black flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
               <div className="w-12 h-12 shrink-0 bg-spider-red text-white rounded-full flex items-center justify-center border-2 border-black font-bebas text-2xl">
                 {user.username.charAt(0).toUpperCase()}
               </div>
@@ -101,7 +108,7 @@ export default function ExplorePage() {
             <button
               onClick={() => sendFriendRequest(user.id)}
               disabled={sentRequests[user.id]}
-              className={`flex items-center gap-2 px-4 py-2 font-bebas text-xl border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-transform ${
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 font-bebas text-xl border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-transform ${
                 sentRequests[user.id] 
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
                   : "bg-spider-blue text-white hover:bg-spider-black hover:-translate-y-1 active:translate-y-0 active:shadow-none"

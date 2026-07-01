@@ -5,11 +5,7 @@ import clsx from "clsx";
 
 const STYLE_VARIANTS = [
   "spider-logo-classic",
-  "spider-logo-heavy-italic",
   "spider-logo-condensed",
-  "spider-logo-pixelated",
-  "spider-logo-graffiti",
-  "spider-logo-chromatic",
   "spider-logo-classic",
   "spider-logo-classic"
 ];
@@ -62,10 +58,7 @@ export function GlitchText({
       
       setTimeout(() => {
         setIsGlitching(false);
-        // Sometimes revert color back, sometimes let it stay for chaos
-        if (Math.random() > 0.3) {
-          setActiveColor(textColorClass);
-        }
+        setActiveColor(textColorClass); // Always revert to the main color
       }, glitchDuration);
 
       const nextGlitchIn = Math.random() * 3000 + 2000;

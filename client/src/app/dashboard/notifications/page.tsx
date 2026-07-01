@@ -26,24 +26,10 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleAccept = async (id: string) => {
-    try {
-      const res = await fetch("/api/friends/accept", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId: id }),
-      });
-      if (res.ok) {
-        setRequests((prev) => prev.filter((r) => r.id !== id));
-      }
-    } catch (error) {
-      console.error("Failed to accept request", error);
-    }
-  };
 
-  const handleDecline = async (id: string) => {
+  const handleRequest = async (id: string, action: 'accept' | 'decline') => {
     try {
-      const res = await fetch("/api/friends/decline", {
+      const res = await fetch(`/api/friends/${action}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ requestId: id }),
@@ -52,14 +38,14 @@ export default function NotificationsPage() {
         setRequests((prev) => prev.filter((r) => r.id !== id));
       }
     } catch (error) {
-      console.error("Failed to decline request", error);
+      console.error(`Failed to ${action} request`, error);
     }
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto w-full h-full">
-      <h1 className="text-5xl font-bebas text-spider-white mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
-        FRIEND REQUESTS
+    <div className="p-4 md:p-8 max-w-4xl mx-auto w-full h-full">
+      <h1 className="text-4xl md:text-5xl font-bebas text-spider-white mb-6 md:mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+        DIMENSIONAL ALERTS
       </h1>
 
       {loading ? (
@@ -68,33 +54,33 @@ export default function NotificationsPage() {
         <p className="font-bebas text-2xl text-spider-white">No pending requests right now.</p>
       ) : (
         <div className="flex flex-col gap-4">
-          {requests.map((request) => (
+          {requests.map((req) => (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              key={request.id}
-              className="comic-panel p-4 bg-spider-white text-spider-black flex items-center justify-between"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              key={req.id}
+              className="comic-panel p-4 bg-spider-white text-spider-black flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div className="w-12 h-12 shrink-0 bg-spider-blue text-white rounded-full flex items-center justify-center border-2 border-black font-bebas text-2xl">
-                  {request.sender.username.charAt(0).toUpperCase()}
+                  {req.sender.username.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-bebas text-2xl">@{request.sender.username}</p>
+                  <p className="font-bebas text-2xl">@{req.sender.username}</p>
                   <p className="font-fredoka text-gray-600">Wants to connect</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <button
-                  onClick={() => handleAccept(request.id)}
-                  className="flex items-center gap-1 px-4 py-2 font-bebas text-xl bg-spider-red text-white border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-transform"
+                  onClick={() => handleRequest(req.id, 'accept')}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 font-bebas text-xl border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-transform bg-green-500 text-white hover:bg-green-600 hover:-translate-y-1 active:translate-y-0 active:shadow-none"
                 >
                   <Check size={20} /> ACCEPT
                 </button>
                 <button
-                  onClick={() => handleDecline(request.id)}
-                  className="flex items-center gap-1 px-4 py-2 font-bebas text-xl bg-gray-200 text-spider-black border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-transform"
+                  onClick={() => handleRequest(req.id, 'decline')}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 font-bebas text-xl border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-transform bg-spider-red text-white hover:bg-spider-black hover:-translate-y-1 active:translate-y-0 active:shadow-none"
                 >
                   <X size={20} /> DECLINE
                 </button>

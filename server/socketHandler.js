@@ -42,7 +42,7 @@ module.exports = (io) => {
         console.warn("⚠️ JWT_SECRET missing in server env! Using fallback.");
       }
 
-      const decoded = jwt.verify(token, secret || "default_secret_for_development");
+      const decoded = jwt.verify(token, secret || "super_secret_jwt_key_for_webverse");
       socket.user = decoded; // Attach verified user to socket
       next();
     } catch (err) {
@@ -52,7 +52,7 @@ module.exports = (io) => {
 
   io.on('connection', (socket) => {
     // Extract userId from verified token
-    const userId = socket.user.userId || 'Unknown';
+    const userId = socket.user.id || socket.user.userId || 'Unknown';
     const username = socket.user.username || 'Anonymous';
     console.log(`[Socket] User connected securely: ${socket.id} (Auth: ${username}, ID: ${userId})`);
 
@@ -152,25 +152,19 @@ module.exports = (io) => {
 
     // ============= DIRECT MESSAGES (Phase 3) =============
 
-    socket.on('join_dm', ({ conversationId }) => {
-      socket.join(`dm:${conversationId}`);
-      console.log(`[Socket] ${username} joined DM room: dm:${conversationId}`);
-    });
+    // We no longer need join_dm / leave_dm as we route directly via userSockets
+    socket.on('join_dm', () => {});
+    socket.on('leave_dm', () => {});
 
-    socket.on('leave_dm', ({ conversationId }) => {
-      socket.leave(`dm:${conversationId}`);
-      console.log(`[Socket] ${username} left DM room: dm:${conversationId}`);
-    });
-
-    socket.on('dm_send', ({ conversationId, content, type, replyTo }) => {
+    socket.on('dm_send', ({ conversationId, content, type, replyTo, messageId }) => {
       if (checkRateLimit(userId)) {
         return socket.emit('error_message', 'Rate limit exceeded. Slow down!');
       }
 
-      // The message is persisted via the Next.js API route.
-      // Here we just broadcast to the conversation room for real-time delivery.
+      const receiverId = conversationId; // In our schema, conversationId passed from client is the friend's ID
+
       const message = {
-        _id: `rt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        _id: messageId || `rt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         senderId: {
           _id: userId,
           username: username,
@@ -183,47 +177,107 @@ module.exports = (io) => {
         replyTo: replyTo || null,
         reactions: [],
         createdAt: new Date().toISOString(),
+        conversationId: userId // For the receiver, the conversation is with the sender
       };
 
-      // Broadcast to all sockets in the DM room EXCEPT the sender
-      socket.to(`dm:${conversationId}`).emit('dm_receive', message);
-      console.log(`[Socket] DM sent in conversation ${conversationId} by ${username}`);
+      // Broadcast to receiver
+      const receiverSockets = userSockets.get(receiverId);
+      if (receiverSockets) {
+        for (const socketId of receiverSockets) {
+          io.to(socketId).emit('dm_receive', message);
+        }
+      }
+
+      // Broadcast to sender's other tabs
+      const mySockets = userSockets.get(userId);
+      if (mySockets) {
+        for (const socketId of mySockets) {
+          if (socketId !== socket.id) {
+            io.to(socketId).emit('dm_receive', { ...message, conversationId: receiverId });
+          }
+        }
+      }
     });
 
-    socket.on('dm_typing', ({ conversationId, userId: typingUserId, isTyping }) => {
-      socket.to(`dm:${conversationId}`).emit('dm_typing', {
-        userId: typingUserId,
-        isTyping
-      });
+    socket.on('dm_typing', ({ conversationId, isTyping }) => {
+      const receiverId = conversationId;
+      const receiverSockets = userSockets.get(receiverId);
+      if (receiverSockets) {
+        for (const socketId of receiverSockets) {
+          io.to(socketId).emit('dm_typing', {
+            userId,
+            isTyping,
+            conversationId: userId
+          });
+        }
+      }
     });
 
     socket.on('dm_seen', ({ conversationId }) => {
-      socket.to(`dm:${conversationId}`).emit('dm_seen', {
-        conversationId,
-        userId
-      });
+      const receiverId = conversationId;
+      const receiverSockets = userSockets.get(receiverId);
+      if (receiverSockets) {
+        for (const socketId of receiverSockets) {
+          io.to(socketId).emit('dm_seen', {
+            conversationId: userId,
+            userId
+          });
+        }
+      }
     });
 
     socket.on('dm_reaction', ({ conversationId, messageId, emoji }) => {
-      socket.to(`dm:${conversationId}`).emit('dm_reaction', {
-        messageId,
-        emoji,
-        userId
-      });
+      const receiverId = conversationId;
+      const receiverSockets = userSockets.get(receiverId);
+      if (receiverSockets) {
+        for (const socketId of receiverSockets) {
+          io.to(socketId).emit('dm_reaction', {
+            messageId,
+            emoji,
+            userId,
+            conversationId: userId
+          });
+        }
+      }
     });
 
     socket.on('dm_edit', ({ conversationId, messageId, content }) => {
-      socket.to(`dm:${conversationId}`).emit('dm_edit', {
-        messageId,
-        content,
-        editedAt: new Date().toISOString()
-      });
+      const receiverId = conversationId;
+      const receiverSockets = userSockets.get(receiverId);
+      if (receiverSockets) {
+        for (const socketId of receiverSockets) {
+          io.to(socketId).emit('dm_edit', {
+            messageId,
+            content,
+            editedAt: new Date().toISOString(),
+            conversationId: userId
+          });
+        }
+      }
     });
 
     socket.on('dm_delete', ({ conversationId, messageId }) => {
-      socket.to(`dm:${conversationId}`).emit('dm_delete', {
-        messageId
-      });
+      const receiverId = conversationId;
+      const receiverSockets = userSockets.get(receiverId);
+      if (receiverSockets) {
+        for (const socketId of receiverSockets) {
+          io.to(socketId).emit('dm_delete', {
+            messageId,
+            conversationId: userId
+          });
+        }
+      }
+    });
+
+    // ============= NOTIFICATIONS =============
+    socket.on('send_notification', ({ receiverId, type, message }) => {
+      console.log(`[Socket] Sending notification to ${receiverId}`);
+      const receiverSockets = userSockets.get(receiverId);
+      if (receiverSockets) {
+        for (const socketId of receiverSockets) {
+          io.to(socketId).emit('notification', { type, message });
+        }
+      }
     });
 
     // ============= DISCONNECT =============

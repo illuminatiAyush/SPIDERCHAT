@@ -94,16 +94,16 @@ export default function DashboardHome() {
   ];
 
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto">
+    <div className="p-4 md:p-10 max-w-6xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-10"
       >
-        <h1 className="text-5xl md:text-7xl font-bebas text-spider-red mb-2 transform -rotate-1 skew-x-[-6deg] drop-shadow-[3px_3px_0_rgba(0,0,0,1)]">
+        <h1 className="text-4xl md:text-7xl font-bebas text-spider-red mb-2 transform -rotate-1 skew-x-[-6deg] drop-shadow-[2px_2px_0_rgba(0,0,0,1)] md:drop-shadow-[3px_3px_0_rgba(0,0,0,1)] break-words">
           WELCOME BACK, {user?.displayName?.toUpperCase() || user?.username?.toUpperCase()}!
         </h1>
-        <p className="font-fredoka text-xl text-spider-white/70 italic">
+        <p className="font-fredoka text-lg md:text-xl text-spider-white/70 italic">
           Your personal multiverse command center.
         </p>
       </motion.div>
