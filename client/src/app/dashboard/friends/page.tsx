@@ -1,0 +1,81 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { MessageSquare } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { useRouter } from "next/navigation";
+
+export default function FriendsPage() {
+  const [friends, setFriends] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchFriends();
+  }, []);
+
+  const fetchFriends = async () => {
+    try {
+      const res = await fetch("/api/friends/list");
+      const data = await res.json();
+      if (res.ok) {
+        setFriends(data.friends);
+      }
+    } catch (error) {
+      console.error("Failed to fetch friends", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openChat = (friendId: string) => {
+    if (!user) return;
+    // Generate deterministic room ID for DM
+    const roomId = [user.id, friendId].sort().join("_");
+    router.push(`/room/${roomId}`);
+  };
+
+  return (
+    <div className="p-8 max-w-4xl mx-auto w-full h-full">
+      <h1 className="text-5xl font-bebas text-spider-white mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+        YOUR ALLIES
+      </h1>
+
+      {loading ? (
+        <p className="font-bebas text-2xl text-spider-white">Loading connections...</p>
+      ) : friends.length === 0 ? (
+        <p className="font-bebas text-2xl text-spider-white">You have no allies yet. Go explore the multiverse!</p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {friends.map((friend) => (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              key={friend.id}
+              className="comic-panel p-4 bg-spider-white text-spider-black flex items-center justify-between"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 shrink-0 bg-spider-red text-white rounded-full flex items-center justify-center border-2 border-black font-bebas text-2xl">
+                  {friend.username.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-bebas text-2xl">@{friend.username}</p>
+                  <p className="font-fredoka text-gray-600">{friend.displayName || "Traveler"}</p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => openChat(friend.id)}
+                className="flex items-center gap-2 px-4 py-2 font-bebas text-xl bg-spider-blue text-white border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-transform"
+              >
+                <MessageSquare size={20} /> OPEN CHAT
+              </button>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

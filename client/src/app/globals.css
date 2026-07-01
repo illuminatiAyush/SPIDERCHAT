@@ -1,0 +1,450 @@
+@import "tailwindcss";
+
+@theme {
+  --color-spider-red: #E23636;
+  --color-spider-blue: #5061E2;
+  --color-spider-black: #121212;
+  --color-spider-white: #FDF6E3;
+  --color-glitch-cyan: #00F5FF;
+  --color-glitch-magenta: #FF00FF;
+
+  --font-bangers: var(--font-bangers), system-ui;
+  --font-fredoka: var(--font-fredoka), sans-serif;
+  --font-marker: var(--font-marker), cursive;
+  --font-bebas: var(--font-bebas), sans-serif;
+
+  --shadow-comic: 4px 4px 0px 0px rgba(0,0,0,1);
+  --shadow-comic-hover: 8px 8px 0px 0px rgba(0,0,0,1);
+}
+
+/* ===================================================================
+   SPIDER-VERSE MUTATING LOGO SYSTEM
+   =================================================================== */
+
+.spiderverse-logo-wrapper {
+  perspective: 1000px;
+  display: inline-block;
+  line-height: 1;
+}
+
+.spiderverse-logo-base {
+  position: relative;
+  display: inline-block;
+  text-transform: uppercase;
+  transform-style: preserve-3d;
+  /* Base subtle breathing/floating animation */
+  animation: logo-breathe 4s ease-in-out infinite alternate;
+  
+  /* Sharp, comic-style outline and shadow */
+  -webkit-text-stroke: 1.5px #000;
+  text-shadow: 4px 4px 0px #000;
+}
+
+@keyframes logo-breathe {
+  0% { transform: translateY(0px) rotate(-2deg) skewX(-12deg); }
+  50% { transform: translateY(-4px) rotate(-1deg) skewX(-10deg); }
+  100% { transform: translateY(2px) rotate(-3deg) skewX(-14deg); }
+}
+
+/* Layer System for RGB Glitching */
+.logo-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-text-stroke: 0; /* Remove stroke from glitch layers */
+  text-shadow: none; /* Remove deep shadow from layers */
+}
+
+/* Ensure the base layer text stays visible and solid */
+.logo-layer-base {
+  position: relative;
+  opacity: 1;
+  color: inherit;
+  -webkit-text-stroke: inherit;
+  text-shadow: inherit;
+  z-index: 2;
+}
+
+/* When glitching, layers become visible and separate */
+.is-glitching .logo-layer-red {
+  opacity: 0.8;
+  color: #ff003c;
+  animation: rgb-shift-red 0.15s infinite alternate;
+  z-index: 1;
+}
+
+.is-glitching .logo-layer-cyan {
+  opacity: 0.8;
+  color: #00f0ff;
+  animation: rgb-shift-cyan 0.2s infinite alternate-reverse;
+  z-index: 1;
+}
+
+.is-glitching .logo-layer-blue {
+  opacity: 0.8;
+  color: #0022ff;
+  animation: rgb-shift-blue 0.1s infinite alternate;
+  z-index: 1;
+}
+
+/* Base text shakes slightly during glitch */
+.is-glitching .logo-layer-base {
+  animation: base-glitch-shake 0.1s infinite steps(2);
+}
+
+@keyframes rgb-shift-red {
+  0% { transform: translate(-4px, 2px) skewX(2deg); }
+  100% { transform: translate(5px, -3px) skewX(-2deg); }
+}
+
+@keyframes rgb-shift-cyan {
+  0% { transform: translate(4px, -4px) skewX(-3deg); }
+  100% { transform: translate(-3px, 5px) skewX(3deg); }
+}
+
+@keyframes rgb-shift-blue {
+  0% { transform: translate(-5px, 0px) scale(1.02); }
+  100% { transform: translate(3px, 3px) scale(0.98); }
+}
+
+@keyframes base-glitch-shake {
+  0% { transform: translate(0px, 0px) skewX(0deg); }
+  50% { transform: translate(-2px, 1px) skewX(-2deg); }
+  100% { transform: translate(1px, -1px) skewX(2deg); }
+}
+
+/* --- LOGO STATES --- */
+
+.spider-logo-classic {
+  font-family: var(--font-bangers), system-ui;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+
+.spider-logo-heavy-italic {
+  font-family: var(--font-bangers), system-ui;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.05em;
+  transform: rotate(-5deg) skewX(-20deg) !important;
+}
+
+.spider-logo-condensed {
+  font-family: var(--font-bebas), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.1em;
+  transform: scaleY(1.3) scaleX(0.8) rotate(-1deg) !important;
+}
+
+.spider-logo-pixelated {
+  font-family: monospace;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  transform: rotate(0deg) skewX(0deg) !important;
+}
+
+.spider-logo-graffiti {
+  font-family: var(--font-marker), cursive;
+  font-weight: normal;
+  letter-spacing: 0.05em;
+  color: var(--color-spider-white);
+  -webkit-text-stroke: 2px #000;
+  text-shadow: 4px 4px 0px #000;
+  transform: rotate(-3deg) scale(1.1) skewX(-5deg) !important;
+}
+
+.spider-logo-chromatic {
+  font-family: var(--font-bangers), system-ui;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, #E23636, #00F5FF, #5061E2, #FF00FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1.5px #000;
+}
+
+/* Halftone Overlay Flash */
+.logo-halftone-overlay {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.6) 1.5px, transparent 1.5px);
+  background-size: 6px 6px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.is-glitching .logo-halftone-overlay {
+  animation: halftone-flash 0.15s infinite steps(2);
+}
+
+@keyframes halftone-flash {
+  0% { opacity: 0; transform: translate(0, 0); }
+  50% { opacity: 0.3; transform: translate(-3px, 3px); }
+  100% { opacity: 0; transform: translate(3px, -3px); }
+}
+
+:root {
+  --spider-red: #E23636;
+  --spider-blue: #5061E2;
+  --spider-black: #121212;
+  --spider-white: #FDF6E3;
+}
+
+body {
+  background-color: var(--spider-black);
+  color: var(--spider-white);
+  font-family: var(--font-fredoka);
+  overflow-x: hidden;
+}
+
+/* Halftone Pattern */
+.halftone-bg {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+
+.halftone-bg-dark {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+/* Comic Panel */
+.comic-panel {
+  border: 4px solid var(--spider-black);
+  box-shadow: 6px 6px 0px 0px var(--spider-black);
+  position: relative;
+  overflow: hidden;
+}
+
+.comic-panel-mobile {
+  border-top: 4px solid var(--spider-black);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .comic-panel-mobile {
+    border: 4px solid var(--spider-black);
+    box-shadow: 6px 6px 0px 0px var(--spider-black);
+  }
+}
+
+.comic-button {
+  padding: 0.5rem 1.5rem;
+  background-color: var(--color-spider-red);
+  color: white;
+  font-family: var(--font-bangers);
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  border-width: 2px;
+  border-color: black;
+  box-shadow: var(--shadow-comic);
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.comic-button:hover {
+  transform: translate(-0.125rem, -0.125rem);
+  box-shadow: var(--shadow-comic-hover);
+}
+
+.comic-button:active {
+  transform: translate(0.25rem, 0.25rem);
+  box-shadow: none;
+}
+
+/* Glitch Effect */
+.glitch-text {
+  position: relative;
+  text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+               -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+               0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  animation: glitch-anim 500ms infinite;
+}
+
+@keyframes glitch-anim {
+  0% {
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                 -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                 -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  14% {
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                 -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                 -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  15% {
+    text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                 0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                 -0.05em -0.05em 0 rgba(0, 255, 0, 0.75);
+  }
+  49% {
+    text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                 0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                 -0.05em -0.05em 0 rgba(0, 255, 0, 0.75);
+  }
+  50% {
+    text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                 0.05em 0 0 rgba(0, 255, 0, 0.75),
+                 0 -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  99% {
+    text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                 0.05em 0 0 rgba(0, 255, 0, 0.75),
+                 0 -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  100% {
+    text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+                 -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+                 -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--spider-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--spider-red);
+  border: 2px solid var(--spider-black);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff4d4d;
+}
+
+/* Mobile: always show reply button since there's no hover */
+@media (max-width: 768px) {
+  .group button[aria-label="Reply to this message"] {
+    opacity: 1 !important;
+  }
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===================================================================
+   GLOBAL FORM INPUT DESIGN TOKEN SYSTEM
+   Ensures all inputs are always visible regardless of theme context.
+   =================================================================== */
+
+/*
+ * Design Tokens as CSS Custom Properties
+ * Light context: inputs on light panels (bg-spider-white, bg-white)
+ * Dark context:  inputs on the dark dashboard shell
+ */
+:root {
+  /* Light Context Tokens (default for forms on light panels) */
+  --input-bg-light: #FFFFFF;
+  --input-text-light: #111111;
+  --input-placeholder-light: #666666;
+  --input-border-light: #111111;
+  --input-caret-light: #111111;
+
+  /* Dark Context Tokens (for inputs on the dark dashboard background) */
+  --input-bg-dark: #171717;
+  --input-text-dark: #FFFFFF;
+  --input-placeholder-dark: #A1A1AA;
+  --input-border-dark: #FFFFFF;
+  --input-caret-dark: #FFFFFF;
+}
+
+/*
+ * LIGHT CONTEXT INPUTS (default)
+ * Most inputs in this app sit inside light-colored panels
+ * (bg-spider-white, bg-white cards on login/signup/profile/etc.)
+ * We target them globally.
+ */
+input,
+textarea,
+select {
+  color: var(--input-text-light);
+  caret-color: var(--input-caret-light);
+}
+
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: var(--input-placeholder-light) !important;
+  opacity: 1 !important;
+}
+
+/* Autofill: force text to remain visible on light backgrounds */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--input-text-light) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg-light) inset !important;
+  box-shadow: 0 0 0px 1000px var(--input-bg-light) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/*
+ * DARK CONTEXT INPUTS
+ * For inputs that sit directly on the dark dashboard background
+ * (not inside a light panel). Apply the class .dark-input or
+ * place inside a .dark-input-context container.
+ */
+.dark-input-context input,
+.dark-input-context textarea,
+.dark-input-context select,
+input.dark-input,
+textarea.dark-input,
+select.dark-input {
+  color: var(--input-text-dark) !important;
+  background-color: var(--input-bg-dark) !important;
+  border-color: var(--input-border-dark) !important;
+  caret-color: var(--input-caret-dark) !important;
+}
+
+.dark-input-context input::placeholder,
+.dark-input-context textarea::placeholder,
+.dark-input-context select::placeholder,
+input.dark-input::placeholder,
+textarea.dark-input::placeholder,
+select.dark-input::placeholder {
+  color: var(--input-placeholder-dark) !important;
+  opacity: 1 !important;
+}
+
+.dark-input-context input:-webkit-autofill,
+.dark-input-context textarea:-webkit-autofill,
+input.dark-input:-webkit-autofill,
+textarea.dark-input:-webkit-autofill {
+  -webkit-text-fill-color: var(--input-text-dark) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg-dark) inset !important;
+  box-shadow: 0 0 0px 1000px var(--input-bg-dark) inset !important;
+}
+
+/* Disabled inputs — slightly muted */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
