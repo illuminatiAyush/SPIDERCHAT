@@ -18,12 +18,10 @@ export default function LandingPage() {
   const { user, logout } = useAuth();
 
   const handleCreateRoom = () => {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
     setIsCreating(true);
-    socket.auth = { username: user.username, userId: user.id };
+    // Connect as anonymous or authenticated
+    const providedUsername = user?.username || "Host_" + Math.floor(Math.random() * 1000);
+    socket.auth = { username: providedUsername, userId: user?.id };
     socket.connect();
     socket.emit("create_room");
   };

@@ -34,7 +34,10 @@ module.exports = (io) => {
       const token = cookies.token || cookies.auth_token;
 
       if (!token) {
-        return next(new Error('Authentication error: No token provided'));
+        // Fallback to anonymous connection for room chats
+        const providedUsername = socket.handshake.auth?.username || 'Anonymous';
+        socket.user = { id: `anon_${Math.random().toString(36).substring(7)}`, username: providedUsername };
+        return next();
       }
 
       const secret = process.env.JWT_SECRET;
@@ -46,7 +49,10 @@ module.exports = (io) => {
       socket.user = decoded; // Attach verified user to socket
       next();
     } catch (err) {
-      next(new Error('Authentication error: Invalid token'));
+      // Invalid token, fallback to anonymous
+      const providedUsername = socket.handshake.auth?.username || 'Anonymous';
+      socket.user = { id: `anon_${Math.random().toString(36).substring(7)}`, username: providedUsername };
+      next();
     }
   });
 
@@ -56,8 +62,8 @@ module.exports = (io) => {
     const username = socket.user.username || 'Anonymous';
     console.log(`[Socket] User connected securely: ${socket.id} (Auth: ${username}, ID: ${userId})`);
 
-    // Track this user's socket for DM routing
-    if (userId !== 'Unknown') {
+    // Track this user's socket for DM routing (only if authenticated user)
+    if (userId !== 'Unknown' && !userId.startsWith('anon_')) {
       if (!userSockets.has(userId)) {
         userSockets.set(userId, new Set());
         // First connection for this user, mark them online
@@ -300,8 +306,8 @@ module.exports = (io) => {
         console.log(`[Socket] ${username} left room ${roomCode}`);
       }
 
-      // DM user tracking cleanup
-      if (userId !== 'Unknown' && userSockets.has(userId)) {
+      // DM user tracking cleanup (only for authenticated users)
+      if (userId !== 'Unknown' && !userId.startsWith('anon_') && userSockets.has(userId)) {
         userSockets.get(userId).delete(socket.id);
         if (userSockets.get(userId).size === 0) {
           userSockets.delete(userId);

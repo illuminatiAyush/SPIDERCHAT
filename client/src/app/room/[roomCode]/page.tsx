@@ -44,16 +44,21 @@ export default function RoomPage() {
   useEffect(() => {
     if (!mounted || !roomCode || loading) return;
 
-    if (!user) {
-      router.push("/join");
+    let storedUsername = user?.username;
+    if (!storedUsername) {
+      storedUsername = sessionStorage.getItem("webverse_username");
+    }
+
+    if (!storedUsername) {
+      router.push(`/join?code=${roomCode}`);
       return;
     }
-    const storedUsername = user.username;
+    
     setUsername(storedUsername);
 
     // Socket events
     if (!socket.connected) {
-      socket.auth = { username: storedUsername, userId: user.id };
+      socket.auth = { username: storedUsername, userId: user?.id };
       socket.connect();
     }
 

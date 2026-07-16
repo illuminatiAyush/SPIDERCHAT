@@ -13,6 +13,7 @@ function JoinForm() {
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
   const [roomCode, setRoomCode] = useState("");
+  const [anonName, setAnonName] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -24,10 +25,10 @@ function JoinForm() {
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedUsername = user?.username?.trim();
+    const trimmedUsername = user?.username?.trim() || anonName.trim();
     const trimmedRoom = roomCode.trim();
     if (!trimmedUsername || !trimmedRoom) {
-      setError("Provide a room code, Avenger! (Make sure you are logged in)");
+      setError("Provide an alias and a room code, Avenger!");
       return;
     }
 
@@ -58,11 +59,24 @@ function JoinForm() {
                 AVENGER: <span className="text-spider-black/50">Loading...</span>
               </span>
             </div>
-          ) : user && (
+          ) : user ? (
             <div className="mb-4">
               <span className="block font-bebas text-spider-black text-2xl mb-1 transform -skew-x-6">
                 AVENGER: <span className="text-spider-red">{user.username}</span>
               </span>
+            </div>
+          ) : (
+            <div className="mb-4">
+              <label className="block font-bebas text-spider-black text-2xl mb-1 transform -skew-x-6">
+                YOUR ALIAS
+              </label>
+              <input
+                type="text"
+                value={anonName}
+                onChange={(e) => setAnonName(e.target.value)}
+                placeholder="Enter a temporary name..."
+                className="w-full px-4 py-3 border-4 border-black font-fredoka focus:outline-none focus:ring-0 text-spider-black bg-white"
+              />
             </div>
           )}
 
