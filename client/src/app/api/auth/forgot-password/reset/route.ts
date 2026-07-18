@@ -1,13 +1,27 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { rateLimit } from '@/lib/rate-limit';
+
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get('x-forwarded-for') || 'unknown-ip';
+    const rateLimitResult = rateLimit(`reset_${ip}`, 5, 15 * 60 * 1000); // 5 per 15 min
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many reset attempts. Please try again later.' }, { status: 429 });
+    }
+
     const { username, answer, newPassword } = await req.json();
 
     if (!username || !answer || !newPassword) {
       return NextResponse.json({ error: 'Username, answer, and new password are required' }, { status: 400 });
+    }
+
+    if (!PASSWORD_REGEX.test(newPassword)) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters long, contain 1 uppercase letter, 1 number, and 1 special character' }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
