@@ -247,14 +247,14 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <a
+          {/* <a
             href="https://github.com/illuminatiAyush"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block hover:scale-105 transition-transform"
           >
             <GlitchText text="BY @ILLUMINATIAYUSH // EARTH-1218" textColorClass="text-spider-white/50" className="text-lg md:text-xl" />
-          </a>
+          </a> */}
         </footer>
       </div>
     </main>

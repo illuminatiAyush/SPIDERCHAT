@@ -67,17 +67,18 @@ export default function DashboardLayout({
     };
   }, [user]);
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-spider-black halftone-bg text-spider-white font-bebas text-4xl">
         LOADING DASHBOARD...
       </div>
     );
-  }
-
-  if (!user) {
-    router.push("/login");
-    return null;
   }
 
   const navItems = [
