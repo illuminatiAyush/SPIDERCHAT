@@ -9,7 +9,9 @@ export async function POST(req: Request) {
   try {
     const { username, password } = await req.json();
 
-    if (username !== 'admin' || password !== '123456') {
+    const normalizedUsername = (username || '').trim().toLowerCase();
+
+    if (normalizedUsername !== 'admin' || password !== '123456') {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 

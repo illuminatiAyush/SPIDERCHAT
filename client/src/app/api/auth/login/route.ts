@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
     }
 
-    if (username === 'admin') {
+    if (username.trim().toLowerCase() === 'admin') {
       return NextResponse.json({ error: 'Admin access requires the secure /admin terminal' }, { status: 403 });
     }
 
