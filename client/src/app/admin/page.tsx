@@ -8,6 +8,7 @@ import Link from "next/link";
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,7 +25,7 @@ export default function AdminDashboard() {
       const res = await fetch('/api/admin/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
+        body: JSON.stringify({ username, password })
       });
       
       const json = await res.json();
@@ -33,7 +34,7 @@ export default function AdminDashboard() {
         setIsAuthenticated(true);
         setData(json.data);
       } else {
-        setError("ACCESS DENIED");
+        setError(json.error || "ACCESS DENIED");
       }
     } catch (err) {
       setError("SYSTEM FAILURE");
@@ -58,13 +59,22 @@ export default function AdminDashboard() {
           
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
+              <label className="block font-bebas text-xl mb-2">OPERATIVE ID</label>
+              <input 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-3 font-mono text-black border-4 border-spider-red bg-spider-white focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                autoFocus
+              />
+            </div>
+            <div>
               <label className="block font-bebas text-xl mb-2">ACCESS CODE</label>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 font-mono text-black border-4 border-spider-red bg-spider-white focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                autoFocus
               />
             </div>
             {error && <p className="font-bebas text-spider-red text-center">{error}</p>}

@@ -12,6 +12,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
     }
 
+    if (username === 'admin') {
+      return NextResponse.json({ error: 'Admin access requires the secure /admin terminal' }, { status: 403 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { username },
     });

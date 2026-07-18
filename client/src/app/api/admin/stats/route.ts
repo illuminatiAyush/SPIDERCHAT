@@ -7,10 +7,10 @@ import path from 'path';
 // In production, use standard JWT/Session validation
 export async function POST(req: Request) {
   try {
-    const { password } = await req.json();
+    const { username, password } = await req.json();
 
-    if (password !== '123456') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (username !== 'admin' || password !== '123456') {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
     // 1. Fetch Users
