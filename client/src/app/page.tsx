@@ -59,7 +59,7 @@ export default function LandingPage() {
               <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] z-50 flex flex-col">
                 <button
                   onClick={logout}
-                  className="font-fredoka text-left px-4 py-2 hover:bg-spider-red hover:text-white transition-colors"
+                  className="font-fredoka text-left px-4 py-2 text-spider-black hover:bg-spider-red hover:text-white transition-colors"
                 >
                   Logout
                 </button>

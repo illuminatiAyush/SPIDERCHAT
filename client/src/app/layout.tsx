@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   title: "SpiderChat",
   description: "Enter the Multiverse of Conversations.",
   icons: {
-    icon: "/spider.png",
+    icon: "/img.png",
   },
 };
 
