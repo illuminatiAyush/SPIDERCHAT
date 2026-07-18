@@ -3,8 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
 
-export async function GET(req: Request, { params }: { params: { roomId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ roomId: string }> }) {
   try {
+    const { roomId: friendId } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -12,8 +13,6 @@ export async function GET(req: Request, { params }: { params: { roomId: string }
 
     const decoded = verifyToken(token) as any;
     if (!decoded || !decoded.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const friendId = params.roomId;
     const roomId = [decoded.id, friendId].sort().join('_');
 
     const messages = await prisma.message.findMany({
@@ -48,8 +47,9 @@ export async function GET(req: Request, { params }: { params: { roomId: string }
   }
 }
 
-export async function POST(req: Request, { params }: { params: { roomId: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ roomId: string }> }) {
   try {
+    const { roomId: friendId } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -57,8 +57,6 @@ export async function POST(req: Request, { params }: { params: { roomId: string 
 
     const decoded = verifyToken(token) as any;
     if (!decoded || !decoded.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const friendId = params.roomId;
     const roomId = [decoded.id, friendId].sort().join('_');
 
     const { content } = await req.json();
