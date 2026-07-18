@@ -13,10 +13,14 @@ const STYLE_VARIANTS = [
 const GLITCH_COLORS = [
   "text-spider-red",
   "text-spider-blue",
-  "text-[#00F5FF]", 
-  "text-[#FF00FF]", 
-  "text-[#39FF14]", 
-  "text-[#FFD700]", 
+  "text-[#00F5FF]", // Cyan
+  "text-[#FF00FF]", // Magenta
+  "text-[#39FF14]", // Neon Green
+  "text-[#FFD700]", // Gold
+  "text-[#FF4500]", // Orange Red
+  "text-[#FF1493]", // Deep Pink
+  "text-[#7FFF00]", // Chartreuse
+  "text-[#9400D3]", // Dark Violet
   "text-white",
 ];
 

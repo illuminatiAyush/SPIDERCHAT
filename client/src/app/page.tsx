@@ -109,7 +109,11 @@ export default function LandingPage() {
           <GlitchText
             text="SPIDERCHAT"
             textColorClass="text-spider-red"
-            glitchVariants={["SPIDER//CHAT", "SP1D3R_CHAT", "SPIDER-CHAT", "SPIDΞRCHAT", ""]}
+            glitchVariants={[
+              "SPIDER//CHAT", "SP1D3R_CHAT", "SPIDER-CHAT", "SPIDΞRCHAT",
+              "S_P_I_D_E_R", "MULT1V3RSE_CHAT", "PETER_CHAT", "MILES_CHAT",
+              "GWEN_CHAT", "VENOM_CHAT", "2099_CHAT", "PUNK_CHAT", "🕸️_CHAT"
+            ]}
             className="text-7xl md:text-9xl mb-2 drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-widest"
           />
           <p className="font-fredoka text-xl md:text-3xl text-spider-white italic mb-12 transform -rotate-2 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
