@@ -208,18 +208,18 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Use Cases Section */}
+        {/* Multiverse Scenarios Section */}
         <section className="mt-32 mb-20 w-full text-left">
           <div className="flex justify-start flex-wrap gap-4 mb-12">
-            <GlitchText text="MULTIVERSE" textColorClass="text-spider-white" className="text-5xl md:text-6xl" />
-            <GlitchText text="SCENARIOS" textColorClass="text-spider-red" className="text-5xl md:text-6xl" />
+            <GlitchText text="CANON" textColorClass="text-spider-white" className="text-5xl md:text-6xl" />
+            <GlitchText text="EVENTS" textColorClass="text-spider-red" className="text-5xl md:text-6xl" />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { title: "Study Groups", icon: "📚", color: "bg-yellow-400" },
-              { title: "Gaming", icon: "🎮", color: "bg-purple-500" },
-              { title: "Events", icon: "🎉", color: "bg-green-500" },
-              { title: "Dev Collab", icon: "💻", color: "bg-blue-500" }
+              { title: "Study Groups (Earth-1610)", icon: "📚", color: "bg-yellow-400" },
+              { title: "Gaming (Earth-42)", icon: "🎮", color: "bg-purple-500" },
+              { title: "Alchemax Events", icon: "🏢", color: "bg-green-500" },
+              { title: "Spider-Society Comm", icon: "🕸️", color: "bg-blue-500" }
             ].map((useCase, i) => (
               <motion.div
                 key={i}
@@ -233,14 +233,27 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <footer className="mt-20 pb-8 text-center">
+        {/* Niche Footer with Links */}
+        <footer className="mt-20 pb-12 text-center border-t-4 border-spider-blue/30 pt-12">
+          <div className="flex flex-wrap justify-center gap-6 md:gap-12 mb-8 font-bebas text-xl text-spider-white/70">
+            <Link href="/privacy-policy" className="hover:text-spider-red hover:underline transition-colors drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+              PRIVACY PROTOCOLS
+            </Link>
+            <Link href="/support" className="hover:text-spider-blue hover:underline transition-colors drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+              GUY IN THE CHAIR (SUPPORT)
+            </Link>
+            <Link href="/feedback" className="hover:text-[#39FF14] hover:underline transition-colors drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+              DAILY BUGLE TIPS (FEEDBACK)
+            </Link>
+          </div>
+
           <a
             href="https://github.com/illuminatiAyush"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block"
+            className="inline-block hover:scale-105 transition-transform"
           >
-            <GlitchText text="BY @ILLUMINATIAYUSH" textColorClass="text-spider-white" className="text-xl md:text-2xl" />
+            <GlitchText text="BY @ILLUMINATIAYUSH // EARTH-1218" textColorClass="text-spider-white/50" className="text-lg md:text-xl" />
           </a>
         </footer>
       </div>
