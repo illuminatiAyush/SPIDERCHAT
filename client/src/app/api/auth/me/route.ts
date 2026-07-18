@@ -35,6 +35,11 @@ export async function GET() {
 
     return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    // If DB fails (e.g. timeout on serverless DB), don't log the user out! 
+    // Fallback to the basic data we have in the JWT token.
+    console.warn("DB query failed in /api/auth/me. Falling back to JWT payload.", error);
+    return NextResponse.json({ 
+      user: { id: decoded.id, username: decoded.username }
+    }, { status: 200 });
   }
 }
