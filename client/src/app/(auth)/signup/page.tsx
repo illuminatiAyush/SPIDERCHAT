@@ -5,14 +5,28 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [securityQuestion, setSecurityQuestion] = useState("");
+  const [isCustomQuestion, setIsCustomQuestion] = useState(false);
+  const [customQuestion, setCustomQuestion] = useState("");
+  const [securityAnswer, setSecurityAnswer] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { signup } = useAuth();
+
+  const securityQuestions = [
+    "What is the name of Peter Parker's uncle?",
+    "Which universe is Spider-Gwen from?",
+    "What is the true identity of the Prowler in Earth-1610?",
+    "Who is the CEO of Alchemax?",
+    "Where did Peter Parker get bitten by the radioactive spider?",
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +34,12 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      await signup({ username, password });
+      const finalQuestion = isCustomQuestion ? customQuestion : securityQuestion;
+
+      if (!finalQuestion || !securityAnswer) {
+        throw new Error("Please select or write a security question and provide an answer");
+      }
+      await signup({ username, password, securityQuestion: finalQuestion, securityAnswer });
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -64,13 +83,74 @@ export default function SignupPage() {
 
           <div>
             <label className="block font-bebas text-xl mb-1 text-spider-black transform -skew-x-6">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50 pr-12"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-spider-black hover:text-spider-red transition-colors"
+              >
+                {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-bebas text-xl mb-1 text-spider-black transform -skew-x-6">Security Question</label>
+            <select
+              value={isCustomQuestion ? "custom" : securityQuestion}
+              onChange={(e) => {
+                if (e.target.value === "custom") {
+                  setIsCustomQuestion(true);
+                  setSecurityQuestion("");
+                } else {
+                  setIsCustomQuestion(false);
+                  setSecurityQuestion(e.target.value);
+                }
+              }}
               className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50"
               required
-              minLength={6}
+            >
+              <option value="" disabled>Select a Multiverse Question</option>
+              {securityQuestions.map((q, i) => (
+                <option key={i} value={q}>{q}</option>
+              ))}
+              <option value="custom">Write my own custom question...</option>
+            </select>
+          </div>
+
+          {isCustomQuestion && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+            >
+              <label className="block font-bebas text-xl mb-1 text-spider-black transform -skew-x-6">Custom Question</label>
+              <input
+                type="text"
+                value={customQuestion}
+                onChange={(e) => setCustomQuestion(e.target.value)}
+                placeholder="E.g., What is my favorite symbiote?"
+                className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50"
+                required
+              />
+            </motion.div>
+          )}
+
+          <div>
+            <label className="block font-bebas text-xl mb-1 text-spider-black transform -skew-x-6">Security Answer</label>
+            <input
+              type="text"
+              value={securityAnswer}
+              onChange={(e) => setSecurityAnswer(e.target.value)}
+              className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50"
+              required
             />
           </div>
 

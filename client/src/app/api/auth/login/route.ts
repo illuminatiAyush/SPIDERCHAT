@@ -16,9 +16,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Admin access requires the secure /admin terminal' }, { status: 403 });
     }
 
-    const user = await prisma.user.findUnique({
+    const userPromise = prisma.user.findUnique({
       where: { username },
     });
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Database timeout. Please try again.')), 8000);
+    });
+
+    const user = await Promise.race([userPromise, timeoutPromise]) as any;
 
     if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });

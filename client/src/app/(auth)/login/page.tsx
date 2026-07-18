@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -64,13 +66,27 @@ export default function LoginPage() {
 
           <div>
             <label className="block font-bebas text-xl mb-1 text-spider-black transform -skew-x-6">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-blue/50"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-blue/50 pr-12"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-spider-black hover:text-spider-blue transition-colors"
+              >
+                {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}
+              </button>
+            </div>
+            <div className="text-right mt-2">
+              <Link href="/forgot-password" className="text-sm font-fredoka text-spider-black hover:text-spider-red hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
           <button

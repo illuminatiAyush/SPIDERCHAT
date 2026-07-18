@@ -18,7 +18,7 @@ export async function GET() {
   }
 
   try {
-    const user = await prisma.user.findUnique({
+    const userPromise = prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
         id: true,
@@ -28,6 +28,12 @@ export async function GET() {
         bio: true,
       }
     });
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Database timeout')), 3000);
+    });
+
+    const user = await Promise.race([userPromise, timeoutPromise]) as any;
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });

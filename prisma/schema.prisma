@@ -21,6 +21,9 @@ model User {
   avatar      String?
   bio         String?
 
+  securityQuestion String?
+  securityAnswer   String?
+
   visitCount  Int      @default(0)
 
   createdAt   DateTime @default(now())

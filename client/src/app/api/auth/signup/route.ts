@@ -6,10 +6,10 @@ import { cookies } from 'next/headers';
 
 export async function POST(req: Request) {
   try {
-    const { username, password } = await req.json();
+    const { username, password, securityQuestion, securityAnswer } = await req.json();
 
-    if (!username || !password) {
-      return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
+    if (!username || !password || !securityQuestion || !securityAnswer) {
+      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -22,12 +22,16 @@ export async function POST(req: Request) {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedSecurityAnswer = await bcrypt.hash(securityAnswer.toLowerCase().trim(), salt);
 
     const user = await prisma.user.create({
       data: {
         username,
         password: hashedPassword,
         displayName: username,
+        // @ts-ignore: fields might not be in generated client yet due to EPERM
+        securityQuestion,
+        securityAnswer: hashedSecurityAnswer,
       },
     });
 
