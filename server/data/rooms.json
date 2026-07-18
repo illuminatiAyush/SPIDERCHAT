@@ -1,15 +1,6 @@
 {
   "GWEN343": {
-    "users": [
-      [
-        "Rjt8AYgvLR-2CBATAAAD",
-        "oooo"
-      ],
-      [
-        "yf2jD7gY25ZoEVksAAAF",
-        "nono"
-      ]
-    ],
+    "users": [],
     "messages": [
       {
         "username": "nono",
@@ -38,6 +29,6 @@
       }
     ],
     "createdAt": 1784387407038,
-    "lastActive": 1784387457782
+    "lastActive": 1784388429445
   }
 }

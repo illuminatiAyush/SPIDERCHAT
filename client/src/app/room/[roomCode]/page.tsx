@@ -44,7 +44,7 @@ export default function RoomPage() {
   useEffect(() => {
     if (!mounted || !roomCode || loading) return;
 
-    let storedUsername = user?.username;
+    let storedUsername: string | undefined | null = user?.username;
     if (!storedUsername) {
       storedUsername = sessionStorage.getItem("spiderchat_username");
     }
