@@ -8,6 +8,7 @@ import { MessageSquare, Search, Plus } from "lucide-react";
 
 type Participant = {
   _id: string;
+  id?: string;
   username: string;
   displayName?: string;
   avatar?: string;
@@ -27,13 +28,24 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     fetchConversations();
     const interval = setInterval(fetchConversations, 10000);
-    return () => clearInterval(interval);
+    
+    const handleLiveUsers = (e: CustomEvent<string[]>) => {
+      setOnlineUsers(new Set(e.detail));
+    };
+
+    window.addEventListener('spiderchat_live_users_update', handleLiveUsers as EventListener);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('spiderchat_live_users_update', handleLiveUsers as EventListener);
+    };
   }, []);
 
   const fetchConversations = async () => {
@@ -173,7 +185,7 @@ export default function MessagesPage() {
                       />
                       <span
                         className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${
-                          other.isOnline ? "bg-green-500" : "bg-gray-400"
+                          onlineUsers.has(other._id) || onlineUsers.has(other.id as string) ? "bg-green-500" : "bg-gray-400"
                         }`}
                       />
                     </div>

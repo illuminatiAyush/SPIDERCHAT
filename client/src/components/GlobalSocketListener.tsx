@@ -60,12 +60,18 @@ export default function GlobalSocketListener() {
       window.dispatchEvent(new Event('spiderchat_new_notification'));
     };
 
+    const handleLiveUsersUpdate = (activeIds: string[]) => {
+      window.dispatchEvent(new CustomEvent('spiderchat_live_users_update', { detail: activeIds }));
+    };
+
     socket.on("dm_receive", handleDmReceive);
     socket.on("notification", handleNotification);
+    socket.on("live_users_update", handleLiveUsersUpdate);
 
     return () => {
       socket.off("dm_receive", handleDmReceive);
       socket.off("notification", handleNotification);
+      socket.off("live_users_update", handleLiveUsersUpdate);
     };
   }, [user, pathname, addToast, router]);
 

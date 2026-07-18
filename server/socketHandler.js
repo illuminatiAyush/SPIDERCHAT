@@ -66,9 +66,7 @@ module.exports = (io) => {
     if (userId !== 'Unknown' && !userId.startsWith('anon_')) {
       if (!userSockets.has(userId)) {
         userSockets.set(userId, new Set());
-        // First connection for this user, mark them online
-        updateUserPresence(userId, true);
-        io.to('admin_dashboard').emit('admin_live_users', Array.from(userSockets.keys()));
+        io.emit('live_users_update', Array.from(userSockets.keys()));
       }
       userSockets.get(userId).add(socket.id);
       console.log(`[Socket] Tracked user ${userId}, total sockets: ${userSockets.get(userId).size}`);
@@ -318,8 +316,7 @@ module.exports = (io) => {
         userSockets.get(userId).delete(socket.id);
         if (userSockets.get(userId).size === 0) {
           userSockets.delete(userId);
-          // Last connection for this user closed, mark them offline
-          updateUserPresence(userId, false);
+          io.emit('live_users_update', Array.from(userSockets.keys()));
           io.to('admin_dashboard').emit('admin_live_users', Array.from(userSockets.keys()));
         }
       }

@@ -28,7 +28,10 @@ model User {
   sentRequests     FriendRequest[] @relation("Sender")
   receivedRequests FriendRequest[] @relation("Receiver")
 
-  messages Message[]
+  messages Message[] // Room Messages
+  directMessages DirectMessage[]
+  conversations Conversation[] @relation("UserConversations")
+  notifications Notification[]
 }
 
 model FriendRequest {
@@ -63,5 +66,46 @@ model Feedback {
   alias     String
   universe  String?
   content   String
+  createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id            String   @id @default(cuid())
+  participants  User[]   @relation("UserConversations")
+  lastMessage   String?
+  lastMessageAt DateTime @default(now())
+  unreadCounts  Json?    @default("{}")
+  messages      DirectMessage[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model DirectMessage {
+  id             String   @id @default(cuid())
+  
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  senderId       String
+  sender         User @relation(fields: [senderId], references: [id])
+  
+  content        String
+  type           String   @default("text")
+  status         String   @default("sent")
+  
+  replyTo        String?
+  reactions      Json?    @default("[]")
+  
+  createdAt      DateTime @default(now())
+  editedAt       DateTime?
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }

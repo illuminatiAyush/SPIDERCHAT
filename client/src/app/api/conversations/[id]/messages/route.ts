@@ -1,28 +1,32 @@
-import { NextRequest, NextResponse } from "next/server";
-import { readJson, IConversation, IDirectMessage, IUser } from "@/lib/jsonDb";
-import { verifyAuthToken } from "@/lib/auth";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/jwt";
 
-interface MessageDbFile {
-  conversations: IConversation[];
-  messages: IDirectMessage[];
-}
-
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = req.cookies.get("auth_token")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const payload = await verifyAuthToken(token);
+    const decoded = verifyToken(token) as any;
+    if (!decoded || !decoded.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
-    // Ensure params is fully awaited
-    const { id: conversationId } = await params;
-    
-    const db = readJson<MessageDbFile>("messages.json");
-    const users = readJson<IUser[]>("users.json");
+    const { id: friendId } = await params;
+    const userId = decoded.id;
 
-    const conv = db.conversations.find(c => c._id === conversationId);
-    if (!conv || !conv.participants.includes(payload.userId)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // Find the conversation
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        AND: [
+          { participants: { some: { id: userId } } },
+          { participants: { some: { id: friendId } } }
+        ]
+      }
+    });
+
+    if (!conversation) {
+      return NextResponse.json({ messages: [] });
     }
 
     const { searchParams } = new URL(req.url);
@@ -30,51 +34,43 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const limit = parseInt(searchParams.get("limit") || "50");
     const query = searchParams.get("search");
 
-    let messages = db.messages.filter(m => m.conversationId === conversationId);
-
+    const whereClause: any = { conversationId: conversation.id };
     if (query) {
-      const queryLower = query.toLowerCase();
-      messages = messages.filter(m => m.content.toLowerCase().includes(queryLower));
+      whereClause.content = { contains: query, mode: "insensitive" };
     }
 
-    // Sort by createdAt descending for pagination
-    messages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    // Paginate
-    const paginated = messages.slice((page - 1) * limit, page * limit);
-
-    // Populate senderId and replyTo
-    const populated = paginated.map(m => {
-      const sender = users.find(u => u._id === m.senderId);
-      const replyMessage = m.replyTo ? db.messages.find(msg => msg._id === m.replyTo) : null;
-
-      let replyPopulated = null;
-      if (replyMessage) {
-        const replySender = users.find(u => u._id === replyMessage.senderId);
-        replyPopulated = {
-          ...replyMessage,
-          senderId: replySender ? {
-            _id: replySender._id,
-            username: replySender.username,
-            displayName: replySender.displayName,
-            avatar: replySender.avatar
-          } : replyMessage.senderId
-        };
+    const messages = await prisma.directMessage.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+      include: {
+        sender: {
+          select: { id: true, username: true, displayName: true, avatar: true }
+        }
       }
-
-      return {
-        ...m,
-        senderId: sender ? {
-          _id: sender._id,
-          username: sender.username,
-          displayName: sender.displayName,
-          avatar: sender.avatar
-        } : m.senderId,
-        replyTo: replyPopulated
-      };
     });
 
-    return NextResponse.json({ messages: populated.reverse() });
+    // Format for frontend
+    const formatted = messages.map(m => ({
+      _id: m.id,
+      conversationId: friendId,
+      senderId: {
+        _id: m.sender.id,
+        username: m.sender.username,
+        displayName: m.sender.displayName,
+        avatar: m.sender.avatar
+      },
+      content: m.content,
+      type: m.type,
+      status: m.status,
+      replyTo: m.replyTo,
+      reactions: m.reactions || [],
+      createdAt: m.createdAt,
+      editedAt: m.editedAt
+    }));
+
+    return NextResponse.json({ messages: formatted.reverse() });
   } catch (error) {
     console.error("Fetch messages error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -1,107 +1,97 @@
-import { NextRequest, NextResponse } from "next/server";
-import { readJson, updateJson, IConversation, IDirectMessage, IUser } from "@/lib/jsonDb";
-import { verifyAuthToken } from "@/lib/auth";
-import { sanitizeInput } from "@/lib/sanitize";
-import { rateLimit } from "@/lib/rateLimit";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/jwt";
 
-const generateObjectId = () => Array.from({length: 24}, () => Math.floor(Math.random()*16).toString(16)).join('');
-
-interface MessageDbFile {
-  conversations: IConversation[];
-  messages: IDirectMessage[];
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { isRateLimited } = rateLimit(req, 100, 60000); // 100 messages per minute
-    if (isRateLimited) {
-      return NextResponse.json({ error: "Rate limit exceeded. Too many messages." }, { status: 429 });
-    }
-
-    const token = req.cookies.get("auth_token")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const payload = await verifyAuthToken(token);
-    const userId = payload.userId as string;
+    const decoded = verifyToken(token) as any;
+    if (!decoded || !decoded.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    
+    // Note: The original code expected conversationId in the body, but it's also in the params.
+    // The param is actually the friend's ID in the current design.
+    const { id: friendId } = await params;
+    const userId = decoded.id;
 
     const rawBody = await req.json();
-    const { conversationId, content, type = "text", replyTo } = sanitizeInput(rawBody);
+    const { content, type = "text", replyTo } = rawBody; // in production add sanitization
 
-    if (!conversationId || !content) {
+    if (!content) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const db = readJson<MessageDbFile>("messages.json");
-    const users = readJson<IUser[]>("users.json");
-
-    // Verify user is part of the conversation
-    const convIndex = db.conversations.findIndex(c => c._id === conversationId);
-    if (convIndex === -1 || !db.conversations[convIndex].participants.includes(userId)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const messageId = generateObjectId();
-    const newMessage: IDirectMessage = {
-      _id: messageId,
-      conversationId,
-      senderId: userId,
-      content,
-      type,
-      replyTo: replyTo || undefined,
-      status: "sent",
-      reactions: [],
-      createdAt: new Date().toISOString()
-    };
-
-    updateJson<MessageDbFile>("messages.json", (current) => {
-      // Find the conversation again inside the transaction context
-      const c = current.conversations.find(conv => conv._id === conversationId);
-      if (c) {
-        c.lastMessage = content.length > 50 ? content.substring(0, 50) + "..." : content;
-        c.lastMessageAt = new Date().toISOString();
-        c.updatedAt = new Date().toISOString();
-        
-        if (!c.unreadCounts) c.unreadCounts = {};
-        for (const participant of c.participants) {
-          const pid = participant.toString();
-          if (pid !== userId) {
-            c.unreadCounts[pid] = (c.unreadCounts[pid] || 0) + 1;
-          }
-        }
+    // Ensure conversation exists
+    let conversation = await prisma.conversation.findFirst({
+      where: {
+        AND: [
+          { participants: { some: { id: userId } } },
+          { participants: { some: { id: friendId } } }
+        ]
       }
-      current.messages.push(newMessage);
-      return current;
     });
 
-    // Populate the response message
-    const sender = users.find(u => u._id === userId);
-    
-    let replyPopulated = null;
-    if (replyTo) {
-      const replyMessage = db.messages.find(m => m._id === replyTo);
-      if (replyMessage) {
-        const replySender = users.find(u => u._id === replyMessage.senderId);
-        replyPopulated = {
-          ...replyMessage,
-          senderId: replySender ? {
-            _id: replySender._id,
-            username: replySender.username,
-            displayName: replySender.displayName,
-            avatar: replySender.avatar
-          } : replyMessage.senderId
-        };
-      }
+    if (!conversation) {
+      conversation = await prisma.conversation.create({
+        data: {
+          participants: {
+            connect: [{ id: userId }, { id: friendId }]
+          },
+          unreadCounts: { [friendId]: 0 }
+        }
+      });
     }
 
+    // Update unread counts
+    let unreadCounts: any = conversation.unreadCounts || {};
+    unreadCounts[friendId] = (unreadCounts[friendId] || 0) + 1;
+
+    // Create message
+    const newMessage = await prisma.directMessage.create({
+      data: {
+        conversationId: conversation.id,
+        senderId: userId,
+        content,
+        type,
+        replyTo,
+      },
+      include: {
+        sender: {
+          select: { id: true, username: true, displayName: true, avatar: true }
+        }
+      }
+    });
+
+    // Update conversation last message
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: {
+        lastMessage: content.length > 50 ? content.substring(0, 50) + "..." : content,
+        lastMessageAt: new Date(),
+        unreadCounts
+      }
+    });
+
+    // Format for frontend
     const populated = {
-      ...newMessage,
-      senderId: sender ? {
-        _id: sender._id,
-        username: sender.username,
-        displayName: sender.displayName,
-        avatar: sender.avatar
-      } : userId,
-      replyTo: replyPopulated
+      _id: newMessage.id,
+      conversationId: friendId, // Frontend expects friendId
+      senderId: {
+        _id: newMessage.sender.id,
+        username: newMessage.sender.username,
+        displayName: newMessage.sender.displayName,
+        avatar: newMessage.sender.avatar
+      },
+      content: newMessage.content,
+      type: newMessage.type,
+      status: newMessage.status,
+      replyTo: newMessage.replyTo,
+      reactions: newMessage.reactions || [],
+      createdAt: newMessage.createdAt,
+      editedAt: newMessage.editedAt
     };
 
     return NextResponse.json({ message: populated });

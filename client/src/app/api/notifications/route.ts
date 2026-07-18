@@ -1,45 +1,42 @@
-import { NextRequest, NextResponse } from "next/server";
-import { readJson, updateJson, INotification } from "@/lib/jsonDb";
-import { verifyAuthToken } from "@/lib/auth";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/jwt";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
   try {
-    const token = req.cookies.get("auth_token")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const payload = await verifyAuthToken(token);
+    const decoded = verifyToken(token) as any;
+    if (!decoded || !decoded.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const notifications = readJson<INotification[]>("notifications.json")
-      .filter(n => n.userId === payload.userId);
+    const notifications = await prisma.notification.findMany({
+      where: { userId: decoded.id },
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    });
 
-    // Sort by createdAt descending
-    notifications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    // Limit to 50
-    const limited = notifications.slice(0, 50);
-
-    return NextResponse.json({ notifications: limited });
+    return NextResponse.json({ notifications });
   } catch (error) {
     console.error("Fetch notifications error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function PUT(req: Request) {
   try {
-    const token = req.cookies.get("auth_token")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const payload = await verifyAuthToken(token);
-    
-    // Mark all as read
-    updateJson<INotification[]>("notifications.json", (current) => {
-      return current.map(n => {
-        if (n.userId === payload.userId && !n.read) {
-          return { ...n, read: true };
-        }
-        return n;
-      });
+    const decoded = verifyToken(token) as any;
+    if (!decoded || !decoded.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    await prisma.notification.updateMany({
+      where: { userId: decoded.id, read: false },
+      data: { read: true }
     });
 
     return NextResponse.json({ success: true });

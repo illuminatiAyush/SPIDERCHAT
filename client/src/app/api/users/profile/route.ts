@@ -1,39 +1,37 @@
-import { NextRequest, NextResponse } from "next/server";
-import { readJson, updateJson, IUser } from "@/lib/jsonDb";
-import { verifyAuthToken } from "@/lib/auth";
-import { sanitizeInput } from "@/lib/sanitize";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/jwt";
 
-export async function PUT(req: NextRequest) {
+export async function PUT(req: Request) {
   try {
-    const token = req.cookies.get("auth_token")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const payload = await verifyAuthToken(token);
-    
+    const decoded = verifyToken(token) as any;
+    if (!decoded || !decoded.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const rawBody = await req.json();
-    const { displayName, bio, avatar } = sanitizeInput(rawBody);
+    const { displayName, bio, avatar } = rawBody; // In production, add validation
 
-    let updatedUser: IUser | null = null;
-
-    updateJson<IUser[]>("users.json", (users) => {
-      const userIndex = users.findIndex(u => u._id === payload.userId);
-      if (userIndex !== -1) {
-        users[userIndex] = {
-          ...users[userIndex],
-          displayName: displayName !== undefined ? displayName : users[userIndex].displayName,
-          bio: bio !== undefined ? bio : users[userIndex].bio,
-          avatar: avatar !== undefined ? avatar : users[userIndex].avatar,
-          updatedAt: new Date().toISOString()
-        };
-        updatedUser = users[userIndex];
+    const updatedUser = await prisma.user.update({
+      where: { id: decoded.id },
+      data: {
+        ...(displayName !== undefined && { displayName }),
+        ...(bio !== undefined && { bio }),
+        ...(avatar !== undefined && { avatar })
       }
-      return users;
     });
 
-    if (!updatedUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
-    const { passwordHash, ...userResponse } = updatedUser as IUser;
-    return NextResponse.json(userResponse);
+    return NextResponse.json({
+      _id: updatedUser.id,
+      id: updatedUser.id,
+      username: updatedUser.username,
+      displayName: updatedUser.displayName,
+      avatar: updatedUser.avatar,
+      bio: updatedUser.bio
+    });
   } catch (error) {
     console.error("Profile update error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
