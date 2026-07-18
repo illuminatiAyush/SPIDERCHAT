@@ -53,17 +53,17 @@ export default function DashboardLayout({
     checkAlerts();
     
     const handleNewNotification = () => setHasNotifications(true);
-    window.addEventListener("webverse_new_notification", handleNewNotification);
+    window.addEventListener("spiderchat_new_notification", handleNewNotification);
     
     const handleNewMessage = () => setHasUnreadMessages(true);
-    window.addEventListener("webverse_new_message", handleNewMessage);
+    window.addEventListener("spiderchat_new_message", handleNewMessage);
     
     // Check every 30s as a simple polling fallback
     const interval = setInterval(checkAlerts, 30000);
     return () => {
       clearInterval(interval);
-      window.removeEventListener("webverse_new_notification", handleNewNotification);
-      window.removeEventListener("webverse_new_message", handleNewMessage);
+      window.removeEventListener("spiderchat_new_notification", handleNewNotification);
+      window.removeEventListener("spiderchat_new_message", handleNewMessage);
     };
   }, [user]);
 
@@ -101,7 +101,7 @@ export default function DashboardLayout({
               <img src="/spider.png" alt="Logo" className="w-full h-full object-cover p-1" />
             </div>
             <span className="hidden md:block ml-3 text-2xl lg:text-3xl font-bebas text-white transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)] tracking-wide">
-              WEBVERSE
+              SPIDERCHAT
             </span>
           </div>
 

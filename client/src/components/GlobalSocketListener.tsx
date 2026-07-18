@@ -42,12 +42,12 @@ export default function GlobalSocketListener() {
       if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
         new Notification(`New Message from ${senderName}`, {
           body: message.content,
-          icon: "/spider.png", // WebVerse icon
+          icon: "/spider.png", // SpiderChat icon
         });
       }
 
       // Dispatch event to light up Messages icon
-      window.dispatchEvent(new Event('webverse_new_message'));
+      window.dispatchEvent(new Event('spiderchat_new_message'));
     };
 
     const handleNotification = (data: any) => {
@@ -57,7 +57,7 @@ export default function GlobalSocketListener() {
         message: data.message || "You have a new notification",
       });
       // Dispatch DOM event to trigger bell in layout
-      window.dispatchEvent(new Event('webverse_new_notification'));
+      window.dispatchEvent(new Event('spiderchat_new_notification'));
     };
 
     socket.on("dm_receive", handleDmReceive);

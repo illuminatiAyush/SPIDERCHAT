@@ -100,19 +100,19 @@ export default function LandingPage() {
           <span className="relative h-24 w-24 md:h-32 md:w-32 flex-shrink-0 rounded-full overflow-hidden border-4 border-spider-black shadow-[4px_4px_0_rgba(0,0,0,1)] mb-4">
             <Image
               src="/spider.png"
-              alt="WebVerse"
+              alt="SpiderChat"
               width={128}
               height={128}
               className="h-full w-full object-cover"
             />
           </span>
           <GlitchText 
-            text="WEBVERSE" 
+            text="SPIDERCHAT" 
             className="text-7xl md:text-9xl mb-6" 
             glitchVariants={["WEB//VERSE", "WEB_V3RSE", "WEB-VERSE", "WΞBVERSΞ"]} 
           />
           <p className="font-fredoka text-xl md:text-3xl text-spider-white italic mb-12 transform -rotate-2 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
-            Enter the Multiverse of the Web
+            Enter the Multiverse of Conversations.
           </p>
         </motion.div>
 
@@ -177,12 +177,12 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Why WebVerse Section */}
+        {/* Why SpiderChat Section */}
         <section className="mt-32 w-full">
           <div className="bg-spider-blue/20 p-8 rounded-3xl border-4 border-spider-blue/30 backdrop-blur-sm">
             <div className="flex justify-center flex-wrap gap-4 mb-12">
               <GlitchText text="WHY" textColorClass="text-spider-blue" className="text-5xl md:text-6xl" />
-              <GlitchText text="WEBVERSE?" textColorClass="text-spider-white" className="text-5xl md:text-6xl" />
+              <GlitchText text="SPIDERCHAT?" textColorClass="text-spider-white" className="text-5xl md:text-6xl" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {[

@@ -37,7 +37,7 @@ function JoinForm() {
       socket.connect();
     }
 
-    sessionStorage.setItem("webverse_username", trimmedUsername);
+    sessionStorage.setItem("spiderchat_username", trimmedUsername);
     router.push(`/room/${trimmedRoom.toUpperCase()}`);
   };
 

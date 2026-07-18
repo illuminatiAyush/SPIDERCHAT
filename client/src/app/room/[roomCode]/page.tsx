@@ -46,7 +46,7 @@ export default function RoomPage() {
 
     let storedUsername = user?.username;
     if (!storedUsername) {
-      storedUsername = sessionStorage.getItem("webverse_username");
+      storedUsername = sessionStorage.getItem("spiderchat_username");
     }
 
     if (!storedUsername) {

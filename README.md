@@ -1,12 +1,12 @@
-# 🕷️ WebVerse
+# 🕷️ SpiderChat
 
-> A Spider-Verse inspired real-time chat platform — enter the multiverse, no login required.
+SpiderChat is a Spider-Verse inspired real-time chat platform featuring rooms, private messaging, friend requests, live communication and a comic-inspired multiverse UI.
 
 ---
 
 ## 🚀 Overview
 
-**WebVerse** is a real-time, anonymous chat application where users can instantly create or join chat rooms using a **room code** — no signup, no friction.
+**SpiderChat** is a real-time, anonymous chat application where users can instantly create or join chat rooms using a **room code** — no signup, no friction.
 
 Built with a **comic-book / Spider-Verse aesthetic**, the platform combines modern real-time communication with a visually unique UI experience.
 
@@ -95,7 +95,7 @@ Room-based Messaging System
 ## 📁 Project Structure
 
 ```
-webverse/
+spiderchat/
 
 ├── src/                 # Frontend (Next.js)
 │   ├── app/
@@ -132,8 +132,8 @@ NEXT_PUBLIC_SOCKET_URL=https://your-backend-url.onrender.com
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/your-username/webverse.git
-cd webverse
+git clone https://github.com/your-username/spiderchat.git
+cd spiderchat
 ```
 
 ---

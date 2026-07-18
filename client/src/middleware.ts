@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
 // We use `jose` for edge compatibility in Next.js middleware
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'super_secret_jwt_key_for_webverse');
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'super_secret_jwt_key_for_spiderchat');
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get('token')?.value;

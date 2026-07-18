@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_jwt_key_for_webverse';
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_jwt_key_for_spiderchat';
 
 export const signToken = (payload: any) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });

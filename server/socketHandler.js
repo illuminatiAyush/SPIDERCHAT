@@ -45,7 +45,7 @@ module.exports = (io) => {
         console.warn("⚠️ JWT_SECRET missing in server env! Using fallback.");
       }
 
-      const decoded = jwt.verify(token, secret || "super_secret_jwt_key_for_webverse");
+      const decoded = jwt.verify(token, secret || "super_secret_jwt_key_for_spiderchat");
       socket.user = decoded; // Attach verified user to socket
       next();
     } catch (err) {

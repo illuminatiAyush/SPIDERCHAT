@@ -33,8 +33,8 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "WebVerse",
-  description: "Enter the Multiverse of the Web",
+  title: "SpiderChat",
+  description: "Enter the Multiverse of Conversations.",
   icons: {
     icon: "/spider.png",
   },

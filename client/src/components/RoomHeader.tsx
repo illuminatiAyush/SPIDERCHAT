@@ -25,7 +25,7 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
 
   const handleLogout = () => {
     socket.disconnect();
-    sessionStorage.removeItem("webverse_username");
+    sessionStorage.removeItem("spiderchat_username");
     router.push("/");
   };
 
@@ -36,19 +36,19 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
           type="button"
           onClick={() => router.push("/")}
           className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity focus:outline-none"
-          aria-label="WebVerse home"
+          aria-label="SpiderChat home"
         >
           <span className="relative h-10 w-10 md:h-12 md:w-12 flex-shrink-0 rounded-full overflow-hidden border-2 border-spider-black shadow-[2px_2px_0_rgba(0,0,0,1)]">
             <Image
               src="/spider.png"
-              alt="WebVerse"
+              alt="SpiderChat"
               width={48}
               height={48}
               className="h-full w-full object-cover"
             />
           </span>
           <span className="font-bebas text-2xl md:text-4xl text-spider-red drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
-            WEBVERSE
+            SPIDERCHAT
           </span>
         </button>
         
