@@ -26,6 +26,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
+    // Increment visitCount
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { visitCount: { increment: 1 } },
+    });
+
     const token = signToken({ id: user.id, username: user.username });
     
     const cookieStore = await cookies();

@@ -1,0 +1,219 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { GlitchText } from "@/components/GlitchText";
+import { ShieldAlert, Users, Activity, MessageSquare, Terminal } from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+
+export default function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const [data, setData] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<"users" | "feedback">("users");
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch('/api/admin/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      
+      const json = await res.json();
+      
+      if (res.ok && json.success) {
+        setIsAuthenticated(true);
+        setData(json.data);
+      } else {
+        setError("ACCESS DENIED");
+      }
+    } catch (err) {
+      setError("SYSTEM FAILURE");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4 halftone-bg">
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="comic-panel bg-spider-black text-spider-white p-8 max-w-md w-full border-4 border-spider-red"
+        >
+          <div className="text-center mb-8">
+            <ShieldAlert className="w-16 h-16 mx-auto text-spider-red mb-4" />
+            <h1 className="font-bebas text-4xl text-spider-red">ALCHEMAX SECURE TERMINAL</h1>
+            <p className="font-fredoka text-sm text-spider-white/60">AUTHORIZED PERSONNEL ONLY</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <label className="block font-bebas text-xl mb-2">ACCESS CODE</label>
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 font-mono text-black border-4 border-spider-red bg-spider-white focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                autoFocus
+              />
+            </div>
+            {error && <p className="font-bebas text-spider-red text-center">{error}</p>}
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="comic-button bg-spider-red text-white w-full py-4 text-xl hover:bg-spider-blue"
+            >
+              {loading ? "AUTHENTICATING..." : "BYPASS MAINFRAME"}
+            </button>
+          </form>
+          <div className="mt-6 text-center">
+             <Link href="/" className="font-bebas text-spider-white/60 hover:text-white">← RETURN TO BASE</Link>
+          </div>
+        </motion.div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-spider-black text-white p-4 md:p-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto">
+        <header className="flex justify-between items-center mb-8 border-b-4 border-spider-blue pb-4">
+          <div className="flex items-center gap-4">
+            <Terminal className="w-10 h-10 text-spider-blue" />
+            <GlitchText text="ADMIN HQ" textColorClass="text-spider-blue" className="text-4xl md:text-5xl" />
+          </div>
+          <button 
+            onClick={() => setIsAuthenticated(false)}
+            className="font-bebas text-xl px-4 py-2 border-2 border-spider-red text-spider-red hover:bg-spider-red hover:text-white transition-colors"
+          >
+            LOGOUT TERMINAL
+          </button>
+        </header>
+
+        {/* METRICS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-spider-white text-spider-black p-6 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-bebas text-2xl">TOTAL USERS</h3>
+              <Users className="w-6 h-6 text-spider-blue" />
+            </div>
+            <p className="font-bebas text-5xl">{data?.stats.totalUsers}</p>
+          </div>
+          <div className="bg-spider-blue text-white p-6 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-bebas text-2xl">LIVE DIMENSIONS</h3>
+              <Activity className="w-6 h-6" />
+            </div>
+            <p className="font-bebas text-5xl">{data?.stats.liveUsers}</p>
+          </div>
+          <div className="bg-[#39FF14] text-spider-black p-6 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-bebas text-2xl">BUGLE TIPS</h3>
+              <MessageSquare className="w-6 h-6" />
+            </div>
+            <p className="font-bebas text-5xl">{data?.stats.totalFeedback}</p>
+          </div>
+          <div className="bg-spider-red text-white p-6 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-bebas text-2xl">TOTAL VISITS</h3>
+              <Terminal className="w-6 h-6" />
+            </div>
+            <p className="font-bebas text-5xl">{data?.stats.totalVisits}</p>
+          </div>
+        </div>
+
+        {/* TABS */}
+        <div className="flex gap-4 mb-6">
+          <button 
+            onClick={() => setActiveTab('users')}
+            className={`font-bebas text-2xl px-6 py-2 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] ${activeTab === 'users' ? 'bg-spider-blue text-white' : 'bg-spider-white text-spider-black hover:bg-gray-200'}`}
+          >
+            USER REGISTRY
+          </button>
+          <button 
+            onClick={() => setActiveTab('feedback')}
+            className={`font-bebas text-2xl px-6 py-2 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] ${activeTab === 'feedback' ? 'bg-[#39FF14] text-black' : 'bg-spider-white text-spider-black hover:bg-gray-200'}`}
+          >
+            BUGLE INBOX
+          </button>
+        </div>
+
+        {/* CONTENT PANELS */}
+        <div className="bg-black border-4 border-spider-white/20 p-4 min-h-[500px]">
+          {activeTab === 'users' && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left font-fredoka text-spider-white">
+                <thead>
+                  <tr className="border-b-2 border-spider-white/20 text-spider-blue font-bebas text-xl">
+                    <th className="p-4">STATUS</th>
+                    <th className="p-4">USERNAME</th>
+                    <th className="p-4">JOINED (EARTH TIME)</th>
+                    <th className="p-4">VISIT COUNT</th>
+                    <th className="p-4">ID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data?.users.map((user: any) => (
+                    <tr key={user.id} className="border-b border-spider-white/10 hover:bg-spider-white/5 transition-colors">
+                      <td className="p-4">
+                        {user.isOnline ? (
+                          <span className="inline-flex items-center gap-2 text-[#39FF14] font-bold">
+                            <div className="w-3 h-3 rounded-full bg-[#39FF14] animate-pulse" /> LIVE
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">OFFLINE</span>
+                        )}
+                      </td>
+                      <td className="p-4 font-bold">{user.username}</td>
+                      <td className="p-4">{new Date(user.createdAt).toLocaleDateString()}</td>
+                      <td className="p-4">{user.visitCount}</td>
+                      <td className="p-4 font-mono text-sm text-gray-500">{user.id}</td>
+                    </tr>
+                  ))}
+                  {data?.users.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-gray-500">NO USERS IN THE MULTIVERSE YET</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === 'feedback' && (
+            <div className="grid gap-4">
+              {data?.feedbacks.map((fb: any) => (
+                <div key={fb.id} className="bg-spider-white/5 border-2 border-spider-white/20 p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h4 className="font-bebas text-2xl text-[#39FF14]">{fb.alias}</h4>
+                      <span className="text-spider-white/50 text-sm">{fb.universe || "Unknown Universe"}</span>
+                    </div>
+                    <span className="text-sm font-mono text-spider-white/50">{new Date(fb.createdAt).toLocaleString()}</span>
+                  </div>
+                  <p className="font-fredoka text-lg whitespace-pre-wrap">{fb.content}</p>
+                </div>
+              ))}
+              {data?.feedbacks.length === 0 && (
+                <div className="p-8 text-center text-gray-500 font-bebas text-2xl">
+                  NO TIPS FROM THE BUGLE TODAY
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+      </div>
+    </main>
+  );
+}

@@ -8,6 +8,28 @@ import { useState } from "react";
 
 export default function FeedbackPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ alias: '', universe: '', content: '' });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (res.ok) {
+        setSubmitted(true);
+        setFormData({ alias: '', universe: '', content: '' });
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="min-h-screen relative flex flex-col items-center p-4 md:p-8 overflow-x-hidden halftone-bg">
@@ -51,7 +73,7 @@ export default function FeedbackPage() {
             </div>
           ) : (
             <form 
-              onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
+              onSubmit={handleSubmit}
               className="space-y-6"
             >
               <div>
@@ -59,6 +81,8 @@ export default function FeedbackPage() {
                 <input 
                   type="text" 
                   required
+                  value={formData.alias}
+                  onChange={(e) => setFormData({...formData, alias: e.target.value})}
                   placeholder="e.g. Peter Parker"
                   className="w-full px-4 py-3 font-fredoka border-4 border-spider-black rounded-lg focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 />
@@ -67,7 +91,9 @@ export default function FeedbackPage() {
               <div>
                 <label className="block font-bebas text-2xl mb-2">YOUR UNIVERSE (OPTIONAL)</label>
                 <input 
-                  type="text" 
+                  type="text"
+                  value={formData.universe}
+                  onChange={(e) => setFormData({...formData, universe: e.target.value})}
                   placeholder="e.g. Earth-1610"
                   className="w-full px-4 py-3 font-fredoka border-4 border-spider-black rounded-lg focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 />
@@ -78,6 +104,8 @@ export default function FeedbackPage() {
                 <textarea 
                   required
                   rows={4}
+                  value={formData.content}
+                  onChange={(e) => setFormData({...formData, content: e.target.value})}
                   placeholder="Tell us what you think..."
                   className="w-full px-4 py-3 font-fredoka border-4 border-spider-black rounded-lg focus:outline-none focus:border-spider-red shadow-[4px_4px_0_0_rgba(0,0,0,1)] resize-none"
                 />
@@ -85,9 +113,10 @@ export default function FeedbackPage() {
 
               <button 
                 type="submit"
-                className="comic-button bg-[#39FF14] text-spider-black w-full py-4 text-2xl hover:bg-spider-black hover:text-[#39FF14] transition-colors"
+                disabled={isSubmitting}
+                className="comic-button bg-[#39FF14] text-spider-black w-full py-4 text-2xl hover:bg-spider-black hover:text-[#39FF14] transition-colors disabled:opacity-50"
               >
-                SUBMIT TO THE BUGLE
+                {isSubmitting ? 'TRANSMITTING...' : 'SUBMIT TO THE BUGLE'}
               </button>
             </form>
           )}

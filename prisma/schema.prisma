@@ -21,6 +21,8 @@ model User {
   avatar      String?
   bio         String?
 
+  visitCount  Int      @default(0)
+
   createdAt   DateTime @default(now())
 
   sentRequests     FriendRequest[] @relation("Sender")
@@ -53,5 +55,13 @@ model Message {
 
   roomId    String?
 
+  createdAt DateTime @default(now())
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  alias     String
+  universe  String?
+  content   String
   createdAt DateTime @default(now())
 }
