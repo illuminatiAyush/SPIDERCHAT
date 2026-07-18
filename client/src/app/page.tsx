@@ -108,10 +108,11 @@ export default function LandingPage() {
           </span>
           <GlitchText 
             text="SPIDERCHAT" 
-            className="text-7xl md:text-9xl mb-6" 
-            glitchVariants={["WEB//VERSE", "WEB_V3RSE", "WEB-VERSE", "WΞBVERSΞ"]} 
+            textColorClass="text-spider-red" 
+            glitchVariants={["SPIDER//CHAT", "SP1D3R_CHAT", "SPIDER-CHAT", "SPIDΞRCHAT"]} 
+            className="text-7xl md:text-9xl mb-2 drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-widest" 
           />
-          <p className="font-fredoka text-xl md:text-3xl text-spider-white italic mb-12 transform -rotate-2 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+          <p className="text-xl md:text-3xl font-fredoka text-spider-white italic bg-black/50 px-4 py-2 rounded-xl inline-block border-2 border-white/20">
             Enter the Multiverse of Conversations.
           </p>
         </motion.div>
