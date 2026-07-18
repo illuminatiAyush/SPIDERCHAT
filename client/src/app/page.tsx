@@ -106,13 +106,13 @@ export default function LandingPage() {
               className="h-full w-full object-cover"
             />
           </span>
-          <GlitchText 
-            text="SPIDERCHAT" 
-            textColorClass="text-spider-red" 
-            glitchVariants={["SPIDER//CHAT", "SP1D3R_CHAT", "SPIDER-CHAT", "SPIDΞRCHAT"]} 
-            className="text-7xl md:text-9xl mb-2 drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-widest" 
+          <GlitchText
+            text="SPIDERCHAT"
+            textColorClass="text-spider-red"
+            glitchVariants={["SPIDER//CHAT", "SP1D3R_CHAT", "SPIDER-CHAT", "SPIDΞRCHAT", ""]}
+            className="text-7xl md:text-9xl mb-2 drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-widest"
           />
-          <p className="text-xl md:text-3xl font-fredoka text-spider-white italic bg-black/50 px-4 py-2 rounded-xl inline-block border-2 border-white/20">
+          <p className="font-fredoka text-xl md:text-3xl text-spider-white italic mb-12 transform -rotate-2 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
             Enter the Multiverse of Conversations.
           </p>
         </motion.div>
@@ -123,7 +123,7 @@ export default function LandingPage() {
             whileTap={{ scale: 0.95 }}
             className="w-full md:w-auto"
           >
-            <Link 
+            <Link
               href="/join"
               className="comic-button block w-full text-center py-4 px-12 bg-spider-blue skew-x-[-6deg]"
             >
@@ -136,7 +136,7 @@ export default function LandingPage() {
             whileTap={{ scale: 0.95 }}
             className="w-full md:w-auto"
           >
-            <button 
+            <button
               onClick={handleCreateRoom}
               disabled={isCreating}
               className={`comic-button w-full py-4 px-12 flex items-center justify-center gap-2 skew-x-[-6deg] ${isCreating ? 'opacity-80 cursor-not-allowed' : ''}`}
