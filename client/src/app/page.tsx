@@ -112,7 +112,7 @@ export default function LandingPage() {
             glitchVariants={[
               "SPIDER//CHAT", "SP1D3R_CHAT", "SPIDER-CHAT", "SPIDΞRCHAT",
               "S_P_I_D_E_R", "MULT1V3RSE_CHAT", "PETER_CHAT", "MILES_CHAT",
-              "GWEN_CHAT", "VENOM_CHAT", "2099_CHAT", "PUNK_CHAT", "🕸️_CHAT"
+              "GWEN_CHAT", "VENOM_CHAT", "2099_CHAT", "🕸️_CHAT"
             ]}
             className="text-7xl md:text-9xl mb-2 drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-widest"
           />
