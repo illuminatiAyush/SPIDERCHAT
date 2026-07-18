@@ -9,7 +9,7 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get('token')?.value;
 
   const isAuthPage = req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/signup');
-  const isProtectedPage = req.nextUrl.pathname.startsWith('/dashboard') || req.nextUrl.pathname.startsWith('/room');
+  const isProtectedPage = req.nextUrl.pathname.startsWith('/dashboard');
 
   if (!token && isProtectedPage) {
     return NextResponse.redirect(new URL('/login', req.url));
