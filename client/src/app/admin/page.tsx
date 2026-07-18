@@ -5,6 +5,7 @@ import { GlitchText } from "@/components/GlitchText";
 import { ShieldAlert, Users, Activity, MessageSquare, Terminal } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { io, Socket } from "socket.io-client";
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,6 +16,33 @@ export default function AdminDashboard() {
   
   const [data, setData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"users" | "feedback">("users");
+  
+  // Real-time tracking
+  const [liveUserIds, setLiveUserIds] = useState<string[]>([]);
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const newSocket = io(SOCKET_URL, {
+        withCredentials: true
+      });
+
+      newSocket.on('connect', () => {
+        newSocket.emit('join_admin_dashboard');
+      });
+
+      newSocket.on('admin_live_users', (activeIds: string[]) => {
+        setLiveUserIds(activeIds);
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        newSocket.disconnect();
+      };
+    }
+  }, [isAuthenticated]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +152,7 @@ export default function AdminDashboard() {
               <h3 className="font-bebas text-2xl">LIVE DIMENSIONS</h3>
               <Activity className="w-6 h-6" />
             </div>
-            <p className="font-bebas text-5xl">{data?.stats.liveUsers}</p>
+            <p className="font-bebas text-5xl">{liveUserIds.length}</p>
           </div>
           <div className="bg-[#39FF14] text-spider-black p-6 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
             <div className="flex items-center justify-between mb-2">
@@ -176,7 +204,7 @@ export default function AdminDashboard() {
                   {data?.users.map((user: any) => (
                     <tr key={user.id} className="border-b border-spider-white/10 hover:bg-spider-white/5 transition-colors">
                       <td className="p-4">
-                        {user.isOnline ? (
+                        {liveUserIds.includes(user.id) ? (
                           <span className="inline-flex items-center gap-2 text-[#39FF14] font-bold">
                             <div className="w-3 h-3 rounded-full bg-[#39FF14] animate-pulse" /> LIVE
                           </span>

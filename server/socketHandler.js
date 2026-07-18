@@ -68,10 +68,17 @@ module.exports = (io) => {
         userSockets.set(userId, new Set());
         // First connection for this user, mark them online
         updateUserPresence(userId, true);
+        io.to('admin_dashboard').emit('admin_live_users', Array.from(userSockets.keys()));
       }
       userSockets.get(userId).add(socket.id);
       console.log(`[Socket] Tracked user ${userId}, total sockets: ${userSockets.get(userId).size}`);
     }
+
+    // ============= ADMIN DASHBOARD =============
+    socket.on('join_admin_dashboard', () => {
+      socket.join('admin_dashboard');
+      socket.emit('admin_live_users', Array.from(userSockets.keys()));
+    });
 
     // ============= ROOM CHAT (existing) =============
 
@@ -313,6 +320,7 @@ module.exports = (io) => {
           userSockets.delete(userId);
           // Last connection for this user closed, mark them offline
           updateUserPresence(userId, false);
+          io.to('admin_dashboard').emit('admin_live_users', Array.from(userSockets.keys()));
         }
       }
 
