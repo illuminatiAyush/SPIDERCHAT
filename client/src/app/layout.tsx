@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { AuthProvider } from "@/components/AuthProvider";
 import { ToastProvider } from "@/components/ToastProvider";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Bangers, Fredoka, Permanent_Marker, Bebas_Neue } from "next/font/google";
 
 const bangers = Bangers({
@@ -48,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${bangers.variable} ${fredoka.variable} ${permanentMarker.variable} ${bebasNeue.variable}`}>
       <body className="antialiased">
+        <AnnouncementBanner />
         <AuthProvider>
           <ToastProvider>
             {children}
