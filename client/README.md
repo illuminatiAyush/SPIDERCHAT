@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SpiderChat Client
 
-## Getting Started
+This is the Next.js frontend for SpiderChat.
 
-First, run the development server:
+## Frontend Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Next.js App Router:** Utilizes the `/app` directory for routing.
+- **Tailwind CSS:** For rapid UI development. Custom comic-book utility classes are defined in `global.css`.
+- **Framer Motion:** Used for smooth, dynamic animations (page transitions, hover effects).
+- **Socket.IO Client:** Connected globally in `GlobalSocketListener.tsx` to handle real-time events efficiently.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Core Pages
+- `/` - Landing Page
+- `/login`, `/signup` - Authentication
+- `/dashboard` - Main hub for authenticated users
+- `/dashboard/messages/[id]` - Direct messaging interface
+- `/dashboard/friends` - Friend list and online status
+- `/dashboard/notifications` - Friend requests and alerts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## State Management
+- `AuthProvider` (Context API) manages user session and JWT token extraction.
+- Local state (`useState`) handles component-specific data (e.g. typing indicators).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Styling & Theme
+The application uses a strict color palette:
+- `spider-red`: `#E23636`
+- `spider-blue`: `#5048E5`
+- `spider-black`: `#101010`
+- `spider-white`: `#F5F5F1`
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All interactive elements utilize comic-book styles (hard drop shadows, heavy borders, skewed containers).

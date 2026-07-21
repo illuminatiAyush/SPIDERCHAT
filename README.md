@@ -1,294 +1,80 @@
-# 🕷️ SpiderChat
+# 🕸️ SpiderChat - The Multiverse of Conversations
 
-SpiderChat is a Spider-Verse inspired real-time chat platform featuring rooms, private messaging, friend requests, live communication and a comic-inspired multiverse UI.
+![SpiderChat Banner](https://placehold.co/1200x400/101010/FF0000?text=SPIDERCHAT)
 
----
+> Enter the Multiverse of Conversations. A highly-stylized, real-time chat application built for speed, privacy, and aesthetics.
 
-## 🚀 Overview
+## Project Overview
 
-**SpiderChat** is a real-time, anonymous chat application where users can instantly create or join chat rooms using a **room code** — no signup, no friction.
+SpiderChat is a production-grade full-stack real-time application. It features a unique comic-book style user interface heavily inspired by the Spider-Verse, combined with robust real-time WebSocket communication and a PostgreSQL backend.
 
-Built with a **comic-book / Spider-Verse aesthetic**, the platform combines modern real-time communication with a visually unique UI experience.
+## Features
 
----
+- **Real-Time Communication:** Instant messaging via Socket.IO.
+- **Multiverse Aesthetics:** Comic panels, halftone backgrounds, and vibrant Spider-themed colors.
+- **Direct Messaging & Friend System:** Add friends, accept requests, and manage your multiverse squad.
+- **Online Presence:** See who is online in real-time.
+- **Message Reactions:** React to messages instantly.
+- **Typing Indicators:** See when your friends are typing.
+- **Anonymous Rooms:** Instantly warp into anonymous rooms without an account.
 
-## ✨ Features
+## Tech Stack
 
-### 🔥 Core Features
+- **Frontend:** Next.js (App Router), React, Tailwind CSS, Framer Motion
+- **Backend:** Node.js, Express, Socket.IO
+- **Database:** PostgreSQL via Prisma ORM
+- **Authentication:** Custom JWT-based HTTP-only cookies (with Socket fallback)
 
-* ⚡ Real-time messaging using Socket.IO
-* 🔑 Join/Create rooms with a simple code
-* 👥 Up to 100 users per room
-* 🚫 No authentication required
-
----
-
-### 🎨 UI & Experience
-
-* 🕶️ Dark / Light mode toggle (persistent)
-* 🕸️ Spider-Verse themed UI (comic panels, bold colors)
-* ✨ Smooth animations (Framer Motion)
-* 📱 Fully responsive design
-
----
-
-### 💬 Chat Features
-
-* 📝 Text messaging
-* 🖼️ Media sharing (images/files)
-* ↩️ Reply to specific messages
-* 😊 Emoji reactions
-* ⏱️ Message timestamps
-* ✏️ Edit & delete messages
-* 📌 Pinned messages (optional extension)
-
----
-
-### ⚙️ Realtime Enhancements
-
-* ⌨️ Typing indicator
-* 🟢 Online user list per room
-* 🔔 Sound notifications for new messages
-* 🔄 Auto-reconnect socket handling
-
----
-
-## 🧱 Tech Stack
-
-### Frontend
-
-* **Next.js (App Router)**
-* **React + TypeScript**
-* **Tailwind CSS**
-* **Framer Motion**
-* **Socket.IO Client**
-
-### Backend
-
-* **Node.js**
-* **Express.js**
-* **Socket.IO**
-
-### Deployment
-
-* Frontend → **Vercel**
-* Backend → **Render**
-
----
-
-## 🏗️ Architecture
+## Folder Structure
 
 ```
-Users (Browser)
-      ↓
-Frontend (Next.js - Vercel)
-      ↓
-WebSocket Connection
-      ↓
-Backend (Node.js + Socket.IO - Render)
-      ↓
-Room-based Messaging System
+SpiderChat/
+├── client/         # Next.js Frontend
+├── server/         # Express + Socket.IO Backend
+├── prisma/         # Database Schema & Migrations
+├── docs/           # Project Documentation
+└── README.md       # You are here
 ```
 
----
+## Installation & Running Locally
 
-## 📁 Project Structure
-
-```
-spiderchat/
-
-├── src/                 # Frontend (Next.js)
-│   ├── app/
-│   ├── components/
-│   ├── lib/
-│   └── styles/
-│
-├── public/
-│
-├── server/              # Backend (Express + Socket.IO)
-│   ├── server.js
-│   ├── socketHandler.js
-│   └── roomManager.js
-│
-├── .env.local
-├── package.json
-└── next.config.ts
-```
-
----
-
-## ⚙️ Environment Variables
-
-### Frontend (.env.local or Vercel)
-
-```
-NEXT_PUBLIC_SOCKET_URL=https://your-backend-url.onrender.com
-```
-
----
-
-## 🛠️ Installation & Setup
-
-### 1️⃣ Clone the repository
-
-```bash
-git clone https://github.com/your-username/spiderchat.git
-cd spiderchat
-```
-
----
-
-### 2️⃣ Install dependencies
-
-```bash
-npm install
-```
-
----
-
-### 3️⃣ Run frontend
-
-```bash
-npm run dev
-```
-
----
-
-### 4️⃣ Run backend
-
-```bash
-cd server
-npm install
-node server.js
-```
-
----
-
-## 🌐 Deployment
-
-### Frontend (Vercel)
-
-1. Import repo into Vercel
-2. Set root directory = `/`
-3. Add environment variable:
-
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/SpiderChat.git
+   cd SpiderChat
    ```
-   NEXT_PUBLIC_SOCKET_URL=https://your-backend.onrender.com
-   ```
-4. Deploy
 
----
+2. **Setup the Database:**
+   - Install dependencies in root: `npm install` (if managing workspaces)
+   - Ensure you have a running PostgreSQL instance.
+   - Configure `.env` in the root (see `.env.example`).
+   - Run Prisma Push: `npx prisma db push`
 
-### Backend (Render)
-
-1. Create Web Service
-2. Root Directory = `server`
-3. Build Command:
-
-   ```
+3. **Start the Server:**
+   ```bash
+   cd server
    npm install
-   ```
-4. Start Command:
-
-   ```
-   node server.js
+   npm start
    ```
 
----
+4. **Start the Client:**
+   ```bash
+   cd client
+   npm install
+   npm run dev
+   ```
 
-## 🔌 Socket Events
+## Documentation
 
-| Event             | Description              |
-| ----------------- | ------------------------ |
-| `join_room`       | User joins a room        |
-| `send_message`    | Send message             |
-| `receive_message` | Receive message          |
-| `typing`          | Typing indicator         |
-| `user_joined`     | User joined notification |
-| `user_left`       | User left notification   |
+Dive deeper into the system architecture and APIs:
+- [Architecture Overview](./docs/ARCHITECTURE.md)
+- [REST API Reference](./docs/API.md)
+- [Socket Events](./docs/SOCKET_EVENTS.md)
+- [Database Schema](./docs/DATABASE.md)
+- [Deployment Guide](./docs/DEPLOYMENT.md)
 
----
+## Contributing
+Please see our [Contributing Guide](./docs/CONTRIBUTING.md) to learn how to help expand the multiverse.
 
-## 🧠 Message Structure
-
-```json
-{
-  "id": "msg123",
-  "user": "Karan",
-  "type": "text",
-  "content": "Hello multiverse",
-  "timestamp": 1710000000,
-  "replyToMessageId": "msg122",
-  "reactions": {
-    "🔥": ["user1", "user2"]
-  }
-}
-```
-
----
-
-## 🔒 Security Considerations
-
-* Input sanitization to prevent XSS
-* Controlled room size (max 100 users)
-* No sensitive user data stored
-
----
-
-## 🧪 Testing Checklist
-
-* ✅ Join room works
-* ✅ Messages send/receive instantly
-* ✅ Media uploads render correctly
-* ✅ Replies display properly
-* ✅ Theme persists across reloads
-* ✅ No console/socket errors
-
----
-
-## 🚧 Future Improvements
-
-* 🔐 Optional authentication system
-* 📦 Message persistence (DB)
-* 📞 Voice / video chat (WebRTC)
-* 🌍 Multi-language support
-* 📊 Admin moderation tools
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!
-
-1. Fork the repo
-2. Create a feature branch
-3. Submit a PR
-
----
-
-## 📄 License
-
+## License
 MIT License
-
----
-
-## 💡 Inspiration
-
-Inspired by the visual storytelling style of the Spider-Verse — blending **technology + comic art + real-time interaction**.
-
----
-
-## 🔗 Live Demo
-
-Frontend: https://your-vercel-app.vercel.app
-Backend: https://your-backend.onrender.com
-
----
-
-## 👨‍💻 Author
-
-Built by **Ayush Singh**
-
----
-
-⭐ If you like this project, give it a star!!!
