@@ -31,11 +31,11 @@ interface GlitchTextProps {
   glitchVariants?: string[];
 }
 
-export function GlitchText({ 
-  text: defaultText, 
-  className, 
+export function GlitchText({
+  text: defaultText,
+  className,
   textColorClass = "text-spider-red",
-  glitchVariants = [] 
+  glitchVariants = []
 }: GlitchTextProps) {
   const [text, setText] = useState(defaultText);
   const [styleState, setStyleState] = useState(STYLE_VARIANTS[0]);
@@ -46,20 +46,21 @@ export function GlitchText({
   useEffect(() => {
     // Array stringified to avoid ref inequality
     const allTextVariants = [defaultText, ...glitchVariants, defaultText, defaultText, defaultText];
-    
+
     const triggerGlitch = () => {
       setIsGlitching(true);
 
       const nextText = allTextVariants[Math.floor(Math.random() * allTextVariants.length)];
       const nextStyle = STYLE_VARIANTS[Math.floor(Math.random() * STYLE_VARIANTS.length)];
       const nextColor = GLITCH_COLORS[Math.floor(Math.random() * GLITCH_COLORS.length)];
-      
+
       setText(nextText);
       setStyleState(nextStyle);
       setActiveColor(nextColor);
 
-      const glitchDuration = Math.random() * 300 + 100;
-      
+      // Increased glitch duration so the alternate text is much more readable
+      const glitchDuration = Math.random() * 2000 + 2000; // between 2s and 4s
+
       setTimeout(() => {
         setIsGlitching(false);
         setText(defaultText);           // Revert to original text
@@ -67,7 +68,8 @@ export function GlitchText({
         setActiveColor(textColorClass); // Revert to the main color
       }, glitchDuration);
 
-      const nextGlitchIn = Math.random() * 3000 + 2000;
+      // Reduced interval so it glitches much more frequently (less waiting on the red text)
+      const nextGlitchIn = Math.random() * 1500 + 1000; // between 1s and 2.5s
       timeoutRef.current = setTimeout(triggerGlitch, nextGlitchIn);
     };
 
@@ -77,7 +79,7 @@ export function GlitchText({
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultText, textColorClass, JSON.stringify(glitchVariants)]);
 
   return (
@@ -95,7 +97,6 @@ export function GlitchText({
         <span className="logo-layer logo-layer-cyan" aria-hidden="true">{text}</span>
         <span className="logo-layer logo-layer-blue" aria-hidden="true">{text}</span>
         <span className="logo-layer logo-layer-base">{text}</span>
-        <div className="logo-halftone-overlay" aria-hidden="true"></div>
       </div>
     </div>
   );

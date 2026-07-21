@@ -10,6 +10,7 @@ import { socket } from "@/lib/socket";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { GlitchText } from "@/components/GlitchText";
+import { HangingWebs } from "@/components/HangingWebs";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -97,9 +98,10 @@ export default function LandingPage() {
       </div>
 
       {/* Animated Background Elements */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-10 left-10 w-64 h-64 bg-spider-red opacity-10 blur-3xl rounded-full animate-pulse" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-spider-blue opacity-10 blur-3xl rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+        <HangingWebs />
       </div>
 
       <div className="z-10 text-center max-w-4xl w-full mt-16">
