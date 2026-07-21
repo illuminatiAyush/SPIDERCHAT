@@ -20,6 +20,16 @@ export default function DashboardHome() {
 
   useEffect(() => {
     fetchDashboardData();
+
+    const handleNewNotification = () => {
+      fetchDashboardData();
+    };
+
+    window.addEventListener("spiderchat_new_notification", handleNewNotification);
+
+    return () => {
+      window.removeEventListener("spiderchat_new_notification", handleNewNotification);
+    };
   }, []);
 
   const fetchDashboardData = async () => {

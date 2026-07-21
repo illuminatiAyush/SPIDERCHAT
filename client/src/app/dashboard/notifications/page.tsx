@@ -10,6 +10,16 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     fetchRequests();
+
+    const handleNewNotification = () => {
+      fetchRequests();
+    };
+
+    window.addEventListener("spiderchat_new_notification", handleNewNotification);
+
+    return () => {
+      window.removeEventListener("spiderchat_new_notification", handleNewNotification);
+    };
   }, []);
 
   const fetchRequests = async () => {

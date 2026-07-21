@@ -15,7 +15,7 @@ export default function LandingPage() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   const handleCreateRoom = () => {
     setIsCreating(true);
@@ -43,6 +43,12 @@ export default function LandingPage() {
     };
   }, [router]);
 
+  useEffect(() => {
+    if (user && !loading) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
   return (
     <main className="min-h-screen relative flex flex-col items-center justify-center p-4 overflow-x-hidden halftone-bg">
       {/* Auth Header */}
@@ -57,6 +63,12 @@ export default function LandingPage() {
             </button>
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] z-50 flex flex-col">
+                <Link
+                  href="/dashboard"
+                  className="font-fredoka text-left px-4 py-2 text-spider-black hover:bg-spider-blue hover:text-white transition-colors border-b-2 border-black"
+                >
+                  Dashboard
+                </Link>
                 <button
                   onClick={logout}
                   className="font-fredoka text-left px-4 py-2 text-spider-black hover:bg-spider-red hover:text-white transition-colors"
@@ -122,39 +134,56 @@ export default function LandingPage() {
         </motion.div>
 
         <div className="flex flex-col md:flex-row gap-6 justify-center items-center px-4">
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: -2 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-full md:w-auto"
-          >
-            <Link
-              href="/join"
-              className="comic-button block w-full text-center py-4 px-12 bg-spider-blue skew-x-[-6deg]"
+          {user ? (
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full md:w-auto"
             >
-              JOIN ROOM
-            </Link>
-          </motion.div>
+              <Link
+                href="/dashboard"
+                className="comic-button block w-full text-center py-4 px-12 bg-spider-red skew-x-[-6deg]"
+              >
+                ENTER DASHBOARD
+              </Link>
+            </motion.div>
+          ) : (
+            <>
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-full md:w-auto"
+              >
+                <Link
+                  href="/join"
+                  className="comic-button block w-full text-center py-4 px-12 bg-spider-blue skew-x-[-6deg]"
+                >
+                  JOIN ROOM
+                </Link>
+              </motion.div>
 
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: 2 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-full md:w-auto"
-          >
-            <button
-              onClick={handleCreateRoom}
-              disabled={isCreating}
-              className={`comic-button w-full py-4 px-12 flex items-center justify-center gap-2 skew-x-[-6deg] ${isCreating ? 'opacity-80 cursor-not-allowed' : ''}`}
-            >
-              {isCreating ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  WARPING...
-                </>
-              ) : (
-                "CREATE ROOM"
-              )}
-            </button>
-          </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: 2 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-full md:w-auto"
+              >
+                <button
+                  onClick={handleCreateRoom}
+                  disabled={isCreating}
+                  className={`comic-button w-full py-4 px-12 flex items-center justify-center gap-2 skew-x-[-6deg] ${isCreating ? 'opacity-80 cursor-not-allowed' : ''}`}
+                >
+                  {isCreating ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      WARPING...
+                    </>
+                  ) : (
+                    "CREATE ROOM"
+                  )}
+                </button>
+              </motion.div>
+            </>
+          )}
         </div>
 
         {/* How it Works Section */}

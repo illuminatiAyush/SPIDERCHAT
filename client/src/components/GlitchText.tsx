@@ -62,10 +62,12 @@ export function GlitchText({
       
       setTimeout(() => {
         setIsGlitching(false);
-        setActiveColor(textColorClass); // Always revert to the main color
+        setText(defaultText);           // Revert to original text
+        setStyleState(STYLE_VARIANTS[0]); // Revert to original style
+        setActiveColor(textColorClass); // Revert to the main color
       }, glitchDuration);
 
-      const nextGlitchIn = 2000;
+      const nextGlitchIn = 2500;
       timeoutRef.current = setTimeout(triggerGlitch, nextGlitchIn);
     };
 
