@@ -41,7 +41,7 @@ const REACTION_EMOJIS = ["🔥", "❤️", "😂", "👍", "😎", "🕷️"];
 
 export default function ConversationPage() {
   const { conversationId } = useParams();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const router = useRouter();
 
   const [messages, setMessages] = useState<MessageType[]>([]);
@@ -117,7 +117,7 @@ export default function ConversationPage() {
     if (!user || !conversationId) return;
 
     if (!socket.connected) {
-      socket.auth = { username: user.username, userId: user.id };
+      socket.auth = { username: user.username, userId: user.id, token };
       socket.connect();
     }
 
@@ -135,8 +135,8 @@ export default function ConversationPage() {
       socket.emit("dm_seen", { conversationId });
     };
 
-    const handleDmTyping = ({ userId, isTyping: typing }: any) => {
-      if (userId !== user.id) {
+    const handleDmTyping = ({ userId, isTyping: typing, conversationId: cid }: any) => {
+      if (cid === conversationId && userId !== user.id) {
         setIsTyping(typing);
       }
     };
@@ -155,17 +155,46 @@ export default function ConversationPage() {
       }
     };
 
+    const handleDmReaction = ({ messageId, emoji, userId: reactorId, conversationId: cid }: any) => {
+      if (cid === conversationId) {
+        setMessages((prev) =>
+          prev.map((m) => {
+            if (m._id === messageId) {
+              const existing = m.reactions.find(
+                (r) => r.emoji === emoji && r.userId === reactorId
+              );
+              if (existing) {
+                return {
+                  ...m,
+                  reactions: m.reactions.filter(
+                    (r) => !(r.emoji === emoji && r.userId === reactorId)
+                  ),
+                };
+              }
+              return {
+                ...m,
+                reactions: [...m.reactions, { emoji, userId: reactorId }],
+              };
+            }
+            return m;
+          })
+        );
+      }
+    };
+
     socket.on("dm_receive", handleDmReceive);
     socket.on("dm_typing", handleDmTyping);
     socket.on("dm_seen", handleDmSeen);
+    socket.on("dm_reaction", handleDmReaction);
 
     return () => {
       socket.off("dm_receive", handleDmReceive);
       socket.off("dm_typing", handleDmTyping);
       socket.off("dm_seen", handleDmSeen);
+      socket.off("dm_reaction", handleDmReaction);
       socket.emit("leave_dm", { conversationId });
     };
-  }, [user, conversationId]);
+  }, [user, token, conversationId]);
 
   // Load more messages
   const loadMore = async () => {

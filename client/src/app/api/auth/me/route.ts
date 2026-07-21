@@ -40,13 +40,14 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ user }, { status: 200 });
+    return NextResponse.json({ user, token }, { status: 200 });
   } catch (error) {
     // If DB fails (e.g. timeout on serverless DB), don't log the user out! 
     // Fallback to the basic data we have in the JWT token.
     console.warn("DB query failed in /api/auth/me. Falling back to JWT payload.", error);
     return NextResponse.json({ 
-      user: { id: decoded.id, username: decoded.username }
+      user: { id: decoded.id, username: decoded.username },
+      token
     }, { status: 200 });
   }
 }

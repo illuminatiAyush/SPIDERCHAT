@@ -31,7 +31,7 @@ module.exports = (io) => {
   io.use((socket, next) => {
     try {
       const cookies = cookie.parse(socket.request.headers.cookie || '');
-      const token = cookies.token || cookies.auth_token;
+      const token = cookies.token || cookies.auth_token || socket.handshake.auth?.token;
 
       if (!token) {
         // Fallback to anonymous connection for room chats

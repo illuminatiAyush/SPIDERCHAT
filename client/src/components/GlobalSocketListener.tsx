@@ -7,7 +7,7 @@ import { socket } from "@/lib/socket";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function GlobalSocketListener() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { addToast } = useToast();
   const pathname = usePathname();
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function GlobalSocketListener() {
     if (!user) return;
 
     if (!socket.connected) {
-      socket.auth = { username: user.username, userId: user.id };
+      socket.auth = { username: user.username, userId: user.id, token };
       socket.connect();
     }
 
@@ -73,7 +73,7 @@ export default function GlobalSocketListener() {
       socket.off("notification", handleNotification);
       socket.off("live_users_update", handleLiveUsersUpdate);
     };
-  }, [user, pathname, addToast, router]);
+  }, [user, token, pathname, addToast, router]);
 
   return null;
 }

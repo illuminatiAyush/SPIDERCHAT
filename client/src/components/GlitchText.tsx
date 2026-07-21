@@ -65,7 +65,7 @@ export function GlitchText({
         setActiveColor(textColorClass); // Always revert to the main color
       }, glitchDuration);
 
-      const nextGlitchIn = Math.random() * 3000 + 2000;
+      const nextGlitchIn = 2000;
       timeoutRef.current = setTimeout(triggerGlitch, nextGlitchIn);
     };
 

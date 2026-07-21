@@ -65,8 +65,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({
-      message: 'Signup successful',
-      user: { id: user.id, username: user.username, displayName: user.displayName },
+      message: 'User created successfully',
+      user: { id: user.id, username: user.username },
+      token
     }, { status: 201 });
   } catch (error: any) {
     console.error('Signup error:', error);
