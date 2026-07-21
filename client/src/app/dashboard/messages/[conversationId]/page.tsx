@@ -103,6 +103,21 @@ export default function ConversationPage() {
     };
 
     fetchConversation();
+
+    const handleLiveUsers = (e: CustomEvent<string[]>) => {
+      const activeIds = new Set(e.detail);
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const isOnline = activeIds.has(prev._id) || activeIds.has((prev as any).id);
+        return { ...prev, isOnline };
+      });
+    };
+
+    window.addEventListener("spiderchat_live_users_update", handleLiveUsers as EventListener);
+
+    return () => {
+      window.removeEventListener("spiderchat_live_users_update", handleLiveUsers as EventListener);
+    };
   }, [conversationId, user]);
 
   // Scroll to bottom on new messages

@@ -17,7 +17,12 @@ export default function FriendsPage() {
     fetchFriends();
     
     const handleLiveUsers = (e: CustomEvent<string[]>) => {
-      setOnlineUsers(new Set(e.detail));
+      const activeIds = new Set(e.detail);
+      setOnlineUsers(activeIds);
+      setFriends(prev => prev.map(f => ({
+        ...f,
+        isOnline: activeIds.has(f.id) || activeIds.has(f._id)
+      })));
     };
 
     window.addEventListener('spiderchat_live_users_update', handleLiveUsers as EventListener);
@@ -73,7 +78,7 @@ export default function FriendsPage() {
                   </div>
                   <span
                     className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${
-                      onlineUsers.has(friend.id) || onlineUsers.has(friend._id) ? "bg-green-500" : "bg-gray-400"
+                      friend.isOnline || onlineUsers.has(friend.id) || onlineUsers.has(friend._id) ? "bg-green-500" : "bg-gray-400"
                     }`}
                   />
                 </div>

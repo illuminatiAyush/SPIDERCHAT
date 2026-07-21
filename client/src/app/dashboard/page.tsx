@@ -25,10 +25,23 @@ export default function DashboardHome() {
       fetchDashboardData();
     };
 
+    const handleLiveUsers = (e: CustomEvent<string[]>) => {
+      const activeIds = new Set(e.detail);
+      setOnlineFriends((prevOnline) => {
+        // We need the full friends list to correctly map who is online.
+        // Let's refetch dashboard data to stay in sync, or just filter it.
+        // Easiest is to trigger fetchDashboardData() which does everything.
+        fetchDashboardData();
+        return prevOnline;
+      });
+    };
+
     window.addEventListener("spiderchat_new_notification", handleNewNotification);
+    window.addEventListener("spiderchat_live_users_update", handleLiveUsers as EventListener);
 
     return () => {
       window.removeEventListener("spiderchat_new_notification", handleNewNotification);
+      window.removeEventListener("spiderchat_live_users_update", handleLiveUsers as EventListener);
     };
   }, []);
 
