@@ -25,6 +25,8 @@ const checkRateLimit = (userId) => {
 
 const cookie = require('cookie');
 const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 module.exports = (io) => {
   // Authentication Middleware
@@ -122,6 +124,10 @@ module.exports = (io) => {
       socket.emit('room_created', roomCode);
     });
 
+    socket.on('join_admin_dashboard', () => {
+      socket.join('admin_dashboard');
+    });
+
     socket.on('send_message', ({ roomCode, text, username, replyTo }) => {
       if (checkRateLimit(userId)) {
         return socket.emit('error_message', 'Rate limit exceeded. Slow down!');
@@ -155,6 +161,41 @@ module.exports = (io) => {
       
       io.to(roomCode).emit('receive_message', message);
       roomManager.saveToPersistence(); // Save history
+
+      // Persist to Postgres for moderation/admin (fire-and-forget)
+      try {
+        const isGuest = userId === 'Unknown' || userId.startsWith('anon_');
+        const dbSenderId = !isGuest ? userId : null;
+        
+        prisma.message.create({
+          data: {
+            content: text,
+            senderId: dbSenderId,
+            senderName: username,
+            roomId: roomCode,
+            type: 'user'
+          }
+        }).then((persistedMessage) => {
+          // Create Moderation Log
+          return prisma.moderationLog.create({
+            data: {
+              messageId: persistedMessage.id,
+              source: 'ROOM',
+              roomId: roomCode,
+              senderId: dbSenderId,
+              senderName: username,
+              messageContent: text,
+              messageType: 'user',
+              isGuest: isGuest,
+              isAuthenticated: !isGuest
+            }
+          });
+        }).then((modLog) => {
+          io.to('admin_dashboard').emit('moderation:new', modLog);
+        }).catch(err => console.error('[Socket] Failed to persist room message or mod log:', err));
+      } catch (err) {
+        console.error('[Socket] Error triggering message persistence:', err);
+      }
     });
 
     socket.on('typing', ({ roomCode, username, isTyping }) => {
@@ -207,6 +248,28 @@ module.exports = (io) => {
             io.to(socketId).emit('dm_receive', { ...message, conversationId: receiverId });
           }
         }
+      }
+
+      // Create Moderation Log (fire-and-forget)
+      try {
+        prisma.moderationLog.create({
+          data: {
+            messageId: message._id,
+            source: 'DM',
+            conversationId: receiverId, // this acts as the "room" for a DM
+            senderId: userId,
+            senderName: username,
+            recipientId: receiverId,
+            messageContent: content,
+            messageType: type || 'text',
+            isGuest: false,
+            isAuthenticated: true
+          }
+        }).then((modLog) => {
+          io.to('admin_dashboard').emit('moderation:new', modLog);
+        }).catch(err => console.error('[Socket] Failed to persist DM mod log:', err));
+      } catch (err) {
+        console.error('[Socket] Error triggering DM moderation persistence:', err);
       }
     });
 

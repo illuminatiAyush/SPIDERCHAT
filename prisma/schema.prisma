@@ -52,16 +52,21 @@ model FriendRequest {
 }
 
 model Message {
-  id        String   @id @default(cuid())
+  id          String   @id @default(cuid())
+  content     String
+  senderId    String?
+  sender      User?    @relation(fields: [senderId], references: [id])
+  senderName  String   @default("Anonymous")
+  roomId      String?
+  type        String   @default("text")
+  deleted     Boolean  @default(false)
+  editedAt    DateTime?
+  attachments Json?    @default("[]")
+  createdAt   DateTime @default(now())
 
-  content   String
-
-  senderId  String
-  sender    User @relation(fields: [senderId], references: [id])
-
-  roomId    String?
-
-  createdAt DateTime @default(now())
+  @@index([roomId])
+  @@index([senderId])
+  @@index([createdAt])
 }
 
 model Feedback {
@@ -99,8 +104,15 @@ model DirectMessage {
   replyTo        String?
   reactions      Json?    @default("[]")
   
+  deleted        Boolean  @default(false)
+  attachments    Json?    @default("[]")
+  
   createdAt      DateTime @default(now())
   editedAt       DateTime?
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
 }
 
 model Notification {
@@ -111,4 +123,28 @@ model Notification {
   message   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model ModerationLog {
+  logId           String   @id @default(cuid())
+  messageId       String?
+  source          String   // "ROOM" or "DM"
+  roomId          String?
+  conversationId  String?
+  senderId        String?
+  senderName      String
+  recipientId     String?
+  recipientName   String?
+  messageContent  String
+  messageType     String   @default("text")
+  createdAt       DateTime @default(now())
+  status          String   @default("ACTIVE")
+  isGuest         Boolean  @default(false)
+  isAuthenticated Boolean  @default(true)
+
+  @@index([source])
+  @@index([senderId])
+  @@index([roomId])
+  @@index([conversationId])
+  @@index([createdAt])
 }

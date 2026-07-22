@@ -34,10 +34,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ roomId: 
       status: "sent",
       reactions: [],
       senderId: {
-        _id: m.sender.id,
-        username: m.sender.username,
-        displayName: m.sender.displayName,
-        avatar: m.sender.avatar
+        _id: m.sender?.id || "anon",
+        username: m.sender?.username || (m as any).senderName || "Anonymous",
+        displayName: m.sender?.displayName || "Anonymous",
+        avatar: m.sender?.avatar || null
       }
     }));
 
@@ -84,10 +84,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ roomId:
       status: "sent",
       reactions: [],
       senderId: {
-        _id: message.sender.id,
-        username: message.sender.username,
-        displayName: message.sender.displayName,
-        avatar: message.sender.avatar
+        _id: message.sender?.id || "anon",
+        username: message.sender?.username || (message as any).senderName || "Anonymous",
+        displayName: message.sender?.displayName || "Anonymous",
+        avatar: message.sender?.avatar || null
       }
     };
 

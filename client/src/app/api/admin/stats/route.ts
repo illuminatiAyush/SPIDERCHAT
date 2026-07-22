@@ -3,15 +3,44 @@ import { prisma } from '@/lib/prisma';
 import fs from 'fs';
 import path from 'path';
 
+import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/jwt';
+
 // Note: Simple hardcoded auth for demo purposes
 // In production, use standard JWT/Session validation
 export async function POST(req: Request) {
+  return handleAuthAndFetch(req);
+}
+
+export async function GET(req: Request) {
+  return handleAuthAndFetch(req);
+}
+
+async function handleAuthAndFetch(req: Request) {
   try {
-    const { username, password } = await req.json();
+    const cookieStore = await cookies();
+    const token = cookieStore.get('adminToken')?.value;
+    let isAuthenticated = false;
 
-    const normalizedUsername = (username || '').trim().toLowerCase();
+    if (token) {
+      const decoded = verifyToken(token) as any;
+      if (decoded && decoded.role === 'admin') {
+        isAuthenticated = true;
+      }
+    }
 
-    if (normalizedUsername !== 'admin' || password !== '123456') {
+    if (!isAuthenticated && req.method === 'POST') {
+      try {
+        const body = await req.json();
+        if (body.username === 'admin' && body.password === '123456') {
+          isAuthenticated = true;
+        }
+      } catch (e) {
+        // ignore body parse error
+      }
+    }
+
+    if (!isAuthenticated) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 

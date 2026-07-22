@@ -11,12 +11,36 @@ export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // default to true while checking session
   const [error, setError] = useState("");
   
   const [data, setData] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<"users" | "feedback">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "feedback" | "messages">("users");
+
+  // Check existing session
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch('/api/admin/stats', { method: 'GET' });
+        const json = await res.json();
+        if (res.ok && json.success) {
+          setIsAuthenticated(true);
+          setData(json.data);
+        }
+      } catch (err) {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkSession();
+  }, []);
   
+  // Message Moderation state
+  const [messages, setMessages] = useState<any[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [messageType, setMessageType] = useState<"all" | "room" | "dm">("all");
   // Real-time tracking
   const [liveUserIds, setLiveUserIds] = useState<string[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -36,13 +60,21 @@ export default function AdminDashboard() {
         setLiveUserIds(activeIds);
       });
 
+      newSocket.on("moderation:new", (modLog: any) => {
+        setMessages((prev) => {
+          if (messageType !== "all" && modLog.source.toLowerCase() !== messageType) return prev;
+          if (searchQuery) return prev;
+          return [modLog, ...prev].slice(0, 50);
+        });
+      });
+
       setSocket(newSocket);
 
       return () => {
         newSocket.disconnect();
       };
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, messageType, searchQuery]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,19 +82,27 @@ export default function AdminDashboard() {
     setError("");
 
     try {
-      const res = await fetch('/api/admin/stats', {
+      // 1. Authenticate and get cookie
+      const authRes = await fetch('/api/admin/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
       
-      const json = await res.json();
+      const authJson = await authRes.json();
       
-      if (res.ok && json.success) {
-        setIsAuthenticated(true);
-        setData(json.data);
+      if (authRes.ok && authJson.success) {
+        // 2. Fetch data (will use the cookie)
+        const statsRes = await fetch('/api/admin/stats', { method: 'GET' });
+        const statsJson = await statsRes.json();
+        if (statsRes.ok && statsJson.success) {
+          setIsAuthenticated(true);
+          setData(statsJson.data);
+        } else {
+          setError("FAILED TO FETCH DATA");
+        }
       } else {
-        setError(json.error || "ACCESS DENIED");
+        setError(authJson.error || "ACCESS DENIED");
       }
     } catch (err) {
       setError("SYSTEM FAILURE");
@@ -70,6 +110,31 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+
+  const loadMessages = async () => {
+    setMessagesLoading(true);
+    try {
+      const res = await fetch('/api/admin/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, search: searchQuery, type: messageType })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setMessages(json.data.messages);
+      }
+    } catch (err) {
+      console.error("Failed to load messages", err);
+    } finally {
+      setMessagesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'messages' && isAuthenticated) {
+      loadMessages();
+    }
+  }, [activeTab, isAuthenticated, messageType]);
 
   if (!isAuthenticated) {
     return (
@@ -184,6 +249,12 @@ export default function AdminDashboard() {
           >
             BUGLE INBOX
           </button>
+          <button 
+            onClick={() => setActiveTab('messages')}
+            className={`font-bebas text-2xl px-6 py-2 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] ${activeTab === 'messages' ? 'bg-spider-red text-white' : 'bg-spider-white text-spider-black hover:bg-gray-200'}`}
+          >
+            MODERATION LOGS
+          </button>
         </div>
 
         {/* CONTENT PANELS */}
@@ -213,7 +284,7 @@ export default function AdminDashboard() {
                         )}
                       </td>
                       <td className="p-4 font-bold">{user.username}</td>
-                      <td className="p-4">{new Date(user.createdAt).toLocaleDateString()}</td>
+                      <td className="p-4">{new Date(user.createdAt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
                       <td className="p-4">{user.visitCount}</td>
                       <td className="p-4 font-mono text-sm text-gray-500">{user.id}</td>
                     </tr>
@@ -237,7 +308,7 @@ export default function AdminDashboard() {
                       <h4 className="font-bebas text-2xl text-[#39FF14]">{fb.alias}</h4>
                       <span className="text-spider-white/50 text-sm">{fb.universe || "Unknown Universe"}</span>
                     </div>
-                    <span className="text-sm font-mono text-spider-white/50">{new Date(fb.createdAt).toLocaleString()}</span>
+                    <span className="text-sm font-mono text-spider-white/50">{new Date(fb.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true })}</span>
                   </div>
                   <p className="font-fredoka text-lg whitespace-pre-wrap">{fb.content}</p>
                 </div>
@@ -245,6 +316,85 @@ export default function AdminDashboard() {
               {data?.feedbacks.length === 0 && (
                 <div className="p-8 text-center text-gray-500 font-bebas text-2xl">
                   NO TIPS FROM THE BUGLE TODAY
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'messages' && (
+            <div>
+              <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <input 
+                  type="text" 
+                  placeholder="SEARCH LOGS..." 
+                  className="px-4 py-3 font-mono text-black border-4 border-spider-red bg-spider-white focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)] w-full max-w-md"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && loadMessages()}
+                />
+                <select 
+                  className="px-4 py-3 font-bebas text-xl text-black border-4 border-spider-red bg-spider-white focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  value={messageType}
+                  onChange={e => setMessageType(e.target.value as any)}
+                >
+                  <option value="all">ALL COMMUNICATIONS</option>
+                  <option value="room">PUBLIC ROOMS</option>
+                  <option value="dm">DIRECT MESSAGES</option>
+                </select>
+                <button 
+                  onClick={loadMessages}
+                  className="comic-button bg-spider-red text-white px-8 py-3 font-bebas text-2xl hover:bg-spider-blue"
+                >
+                  SCAN
+                </button>
+              </div>
+
+              {messagesLoading ? (
+                <div className="p-8 text-center text-spider-red font-bebas text-2xl animate-pulse">DECRYPTING DATA...</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left font-fredoka text-spider-white">
+                    <thead>
+                      <tr className="border-b-2 border-spider-white/20 text-spider-red font-bebas text-xl">
+                        <th className="p-4">SOURCE</th>
+                        <th className="p-4">SENDER</th>
+                        <th className="p-4 w-1/2">CONTENT</th>
+                        <th className="p-4">DESTINATION (ROOM/DM)</th>
+                        <th className="p-4">TIMESTAMP</th>
+                        <th className="p-4">STATUS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {messages.map((msg: any) => (
+                        <tr key={msg.logId} className={`border-b border-spider-white/10 hover:bg-spider-white/5 transition-colors ${msg.status === 'DELETED' ? 'opacity-50' : ''}`}>
+                          <td className="p-4">
+                            <span className={`px-2 py-1 text-xs font-bold rounded ${msg.source === 'ROOM' ? 'bg-spider-blue text-white' : 'bg-[#39FF14] text-black'}`}>
+                              {msg.source}
+                            </span>
+                          </td>
+                          <td className="p-4 font-bold">
+                            {msg.senderName}
+                            {msg.isGuest && <span className="ml-2 text-xs font-mono text-spider-white/50">(GUEST)</span>}
+                          </td>
+                          <td className="p-4 break-words">
+                            {msg.messageContent}
+                            {msg.status === 'DELETED' && <span className="ml-2 text-spider-red font-bold text-xs">[DELETED]</span>}
+                            {msg.status === 'EDITED' && <span className="ml-2 text-gray-500 font-bold text-xs">[EDITED]</span>}
+                          </td>
+                          <td className="p-4 font-mono text-sm text-gray-400">
+                            {msg.source === 'ROOM' ? msg.roomId : `DM: ${msg.conversationId}`}
+                          </td>
+                          <td className="p-4">{new Date(msg.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true })}</td>
+                          <td className="p-4 text-xs font-mono">{msg.status}</td>
+                        </tr>
+                      ))}
+                      {messages.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="p-8 text-center text-gray-500">NO LOGS FOUND</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
