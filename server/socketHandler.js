@@ -44,10 +44,11 @@ module.exports = (io) => {
 
       const secret = process.env.JWT_SECRET;
       if (!secret) {
-        console.warn("⚠️ JWT_SECRET missing in server env! Using fallback.");
+        console.warn("⚠️ JWT_SECRET missing in server env! Cannot authenticate socket.");
+        throw new Error("Missing secret");
       }
 
-      const decoded = jwt.verify(token, secret || "super_secret_jwt_key_for_spiderchat");
+      const decoded = jwt.verify(token, secret);
       socket.user = decoded; // Attach verified user to socket
       next();
     } catch (err) {
@@ -125,10 +126,15 @@ module.exports = (io) => {
     });
 
     socket.on('join_admin_dashboard', () => {
-      socket.join('admin_dashboard');
+      // Allow if user is admin (hardcoded 'admin' username check since no role column exists yet, or check a role if present)
+      if (socket.user && socket.user.username === 'admin') {
+        socket.join('admin_dashboard');
+      } else {
+        console.warn(`[Socket] Unauthorized admin join attempt by ${username}`);
+      }
     });
 
-    socket.on('send_message', ({ roomCode, text, username, replyTo }) => {
+    socket.on('send_message', ({ roomCode, text, replyTo }) => {
       if (checkRateLimit(userId)) {
         return socket.emit('error_message', 'Rate limit exceeded. Slow down!');
       }

@@ -65,12 +65,15 @@ async function handleAuthAndFetch(req: Request) {
     let onlineUserIds = new Set<string>();
     try {
       const serverDataPath = path.join(process.cwd(), '../server/data/users.json');
-      if (fs.existsSync(serverDataPath)) {
-        const raw = fs.readFileSync(serverDataPath, 'utf8');
+      try {
+        await fs.promises.access(serverDataPath);
+        const raw = await fs.promises.readFile(serverDataPath, 'utf8');
         const jsonUsers = JSON.parse(raw);
         jsonUsers.forEach((u: any) => {
           if (u.isOnline) onlineUserIds.add(u._id);
         });
+      } catch (e) {
+        // file does not exist or cannot be read, ignore safely
       }
     } catch (e) {
       console.error('Could not read JSON DB for live users', e);
