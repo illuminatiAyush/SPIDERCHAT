@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, UserCheck, Clock } from "lucide-react";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 import { socket } from "@/lib/socket";
 
 export default function ExplorePage() {
@@ -83,7 +84,7 @@ export default function ExplorePage() {
       </div>
 
       <div className="flex flex-col gap-4">
-        {loading && <p className="font-bebas text-2xl text-spider-white">Searching...</p>}
+        {loading && <p className="font-bebas text-2xl text-spider-white/60 animate-pulse">SCANNING THE MULTIVERSE...</p>}
         {!loading && query && users.length === 0 && (
           <p className="font-bebas text-2xl text-spider-white">No travelers found.</p>
         )}

@@ -11,11 +11,13 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { GlitchText } from "@/components/GlitchText";
 import { HangingWebs } from "@/components/HangingWebs";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 export default function LandingPage() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const { user, loading, logout } = useAuth();
 
   const handleCreateRoom = () => {
@@ -49,6 +51,22 @@ export default function LandingPage() {
       router.push("/dashboard");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    // 2-second splash screen on initial load
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showSplash) {
+    return (
+      <div className="h-screen flex flex-col gap-6 items-center justify-center bg-spider-black halftone-bg w-full">
+        <LoadingAnimation size={300} text="ENTERING THE MULTIVERSE..." />
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen relative flex flex-col items-center justify-center p-4 overflow-x-hidden halftone-bg">
@@ -176,8 +194,8 @@ export default function LandingPage() {
                 >
                   {isCreating ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      WARPING...
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin opacity-70" />
+                      <span className="text-white/80">ACTIVATING SLING RING...</span>
                     </>
                   ) : (
                     "CREATE ROOM"

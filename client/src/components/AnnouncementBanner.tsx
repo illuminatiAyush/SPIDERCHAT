@@ -10,24 +10,7 @@ export const SHOW_ANNOUNCEMENT_BANNER = true;
 const BANNER_LOCAL_STORAGE_KEY = "spiderchat_banner_dismissed_v1";
 
 export function AnnouncementBanner() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    // Only run on client to avoid hydration mismatch
-    if (!SHOW_ANNOUNCEMENT_BANNER) return;
-
-    const isDismissed = localStorage.getItem(BANNER_LOCAL_STORAGE_KEY);
-    if (!isDismissed) {
-      setIsVisible(true);
-    }
-  }, []);
-
-  const handleDismiss = () => {
-    localStorage.setItem(BANNER_LOCAL_STORAGE_KEY, "true");
-    setIsVisible(false);
-  };
-
-  if (!SHOW_ANNOUNCEMENT_BANNER || !isVisible) {
+  if (!SHOW_ANNOUNCEMENT_BANNER) {
     return null;
   }
 
@@ -56,14 +39,6 @@ export function AnnouncementBanner() {
             {bannerText}
           </div>
         </div>
-
-        <button
-          onClick={handleDismiss}
-          className="absolute right-0 top-0 bottom-0 px-2 md:px-3 flex items-center justify-center bg-spider-black/90 backdrop-blur-sm hover:text-spider-red hover:bg-spider-black transition-colors z-10"
-          aria-label="Dismiss announcement"
-        >
-          <X size={16} strokeWidth={2.5} />
-        </button>
       </motion.div>
     </AnimatePresence>
   );

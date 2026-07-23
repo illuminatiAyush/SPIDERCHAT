@@ -4,34 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ToastProvider } from "@/components/ToastProvider";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
-import { Bangers, Fredoka, Permanent_Marker, Bebas_Neue } from "next/font/google";
 
-const bangers = Bangers({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-bangers",
-  display: "swap",
-});
-
-const fredoka = Fredoka({
-  subsets: ["latin"],
-  variable: "--font-fredoka",
-  display: "swap",
-});
-
-const permanentMarker = Permanent_Marker({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-marker",
-  display: "swap",
-});
-
-const bebasNeue = Bebas_Neue({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-bebas",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "SpiderChat",
@@ -47,7 +20,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${bangers.variable} ${fredoka.variable} ${permanentMarker.variable} ${bebasNeue.variable}`}>
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bebas+Neue&family=Fredoka:wght@300..700&family=Permanent+Marker&display=swap" rel="stylesheet" />
+      </head>
       <body className="antialiased">
         <AnnouncementBanner />
         <AuthProvider>

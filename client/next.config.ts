@@ -25,8 +25,8 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            // Allow images from any source for avatars, allow websockets
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; connect-src *; font-src 'self' data:;",
+            // Allow images from any source for avatars, allow websockets, allow google fonts
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src * data: blob:; connect-src *; font-src 'self' data: https://fonts.gstatic.com;",
           }
         ],
       },

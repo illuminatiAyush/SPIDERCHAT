@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { socket } from "@/lib/socket";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 import {
   ArrowLeft,
   Send,
@@ -14,6 +15,7 @@ import {
   Check,
   CheckCheck,
   Smile,
+  Image as ImageIcon
 } from "lucide-react";
 
 type MessageType = {
@@ -371,10 +373,8 @@ export default function ConversationPage() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <p className="font-bebas text-4xl text-spider-white animate-pulse">
-          LOADING CONVERSATION...
-        </p>
+      <div className="flex h-full flex-col gap-6 items-center justify-center">
+        <LoadingAnimation size={300} text="CALIBRATING STARK TECH..." />
       </div>
     );
   }
@@ -436,11 +436,11 @@ export default function ConversationPage() {
               className="font-bebas text-lg text-spider-blue hover:text-spider-red transition-colors flex items-center gap-2 mx-auto px-4 py-2 border-2 border-spider-blue/30 rounded-xl hover:border-spider-red/30"
             >
               {loadingMore ? (
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={18} className="animate-spin opacity-70" />
               ) : (
                 <ChevronUp size={18} />
               )}
-              {loadingMore ? "LOADING..." : "LOAD EARLIER MESSAGES"}
+              {loadingMore ? <span className="text-spider-blue/70">ACCESSING QUANTUM REALM...</span> : "LOAD EARLIER MESSAGES"}
             </motion.button>
           </div>
         )}

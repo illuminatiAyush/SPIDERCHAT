@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 export default function NotificationsPage() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -59,7 +60,7 @@ export default function NotificationsPage() {
       </h1>
 
       {loading ? (
-        <p className="font-bebas text-2xl text-spider-white">Loading signals...</p>
+        <p className="font-bebas text-2xl text-spider-white/60 animate-pulse">INTERCEPTING S.H.I.E.L.D. TRANSMISSIONS...</p>
       ) : requests.length === 0 ? (
         <p className="font-bebas text-2xl text-spider-white">No pending requests right now.</p>
       ) : (

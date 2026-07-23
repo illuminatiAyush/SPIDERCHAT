@@ -11,6 +11,7 @@ import UserList from "@/components/UserList";
 import RoomHeader from "@/components/RoomHeader";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 export type Message = {
   username: string;
@@ -118,11 +119,8 @@ export default function RoomPage() {
 
   if (!mounted || !isJoined || !username || !roomCode) {
     return (
-      <div className="h-screen flex items-center justify-center bg-spider-black halftone-bg">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-spider-red border-t-transparent rounded-full animate-spin" />
-          <p className="font-bebas text-2xl text-spider-white tracking-widest animate-pulse uppercase">WARPING TO DIMENSION...</p>
-        </div>
+      <div className="h-screen flex flex-col gap-6 items-center justify-center bg-spider-black halftone-bg">
+        <LoadingAnimation size={240} text="WARPING TO DIMENSION..." />
       </div>
     );
   }

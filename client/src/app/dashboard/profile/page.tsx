@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { motion } from "framer-motion";
-import { User, Save, Loader2, Camera } from "lucide-react";
+import { User, Save, Camera, Loader2 } from "lucide-react";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 export default function ProfilePage() {
   const { user, checkAuth } = useAuth();
@@ -212,8 +213,8 @@ export default function ProfilePage() {
         >
           {saving ? (
             <>
-              <Loader2 size={24} className="animate-spin" />
-              SAVING...
+              <Loader2 size={24} className="animate-spin opacity-70" />
+              <span className="text-white/80">UPLOADING TO WAKANDA...</span>
             </>
           ) : (
             <>

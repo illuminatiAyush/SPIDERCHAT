@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, UserMinus, ShieldAlert } from "lucide-react";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 
@@ -55,7 +56,7 @@ export default function FriendsPage() {
       </h1>
 
       {loading ? (
-        <p className="font-bebas text-2xl text-spider-white">Loading connections...</p>
+        <p className="font-bebas text-2xl text-spider-white/60 animate-pulse">ASSEMBLING THE AVENGERS...</p>
       ) : friends.length === 0 ? (
         <p className="font-bebas text-2xl text-spider-white">You have no allies yet. Go explore the multiverse!</p>
       ) : (

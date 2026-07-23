@@ -8,10 +8,10 @@
   --color-glitch-cyan: #00F5FF;
   --color-glitch-magenta: #FF00FF;
 
-  --font-bangers: var(--font-bangers), system-ui;
-  --font-fredoka: var(--font-fredoka), sans-serif;
-  --font-marker: var(--font-marker), cursive;
-  --font-bebas: var(--font-bebas), sans-serif;
+  --font-bangers: "Bangers", system-ui;
+  --font-fredoka: "Fredoka", sans-serif;
+  --font-marker: "Permanent Marker", cursive;
+  --font-bebas: "Bebas Neue", sans-serif;
 
   --shadow-comic: 4px 4px 0px 0px rgba(0,0,0,1);
   --shadow-comic-hover: 8px 8px 0px 0px rgba(0,0,0,1);

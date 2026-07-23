@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { socket } from "@/lib/socket";
 import { useAuth } from "@/components/AuthProvider";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 function JoinForm() {
   const router = useRouter();
@@ -54,9 +55,9 @@ function JoinForm() {
 
         <form onSubmit={handleJoin} className="space-y-6">
           {loading ? (
-            <div className="mb-4">
+            <div className="mb-4 animate-pulse opacity-70">
               <span className="block font-bebas text-spider-black text-2xl mb-1 transform -skew-x-6">
-                AVENGER: <span className="text-spider-black/50">Loading...</span>
+                AVENGER: <span className="text-spider-black/50">CONSULTING JARVIS...</span>
               </span>
             </div>
           ) : user ? (
@@ -124,7 +125,11 @@ function JoinForm() {
 
 export default function JoinPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-spider-white font-bebas text-4xl">LOADING DIMENSION...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col gap-6 items-center justify-center halftone-bg">
+        <LoadingAnimation size={300} text="LOADING DIMENSION..." />
+      </div>
+    }>
       <JoinForm />
     </Suspense>
   );

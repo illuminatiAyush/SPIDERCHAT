@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Search, Plus } from "lucide-react";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 type Participant = {
   _id: string;
@@ -142,9 +143,7 @@ export default function MessagesPage() {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="p-6 text-center">
-              <p className="font-bebas text-2xl text-spider-black/50 animate-pulse">
-                LOADING CHATS...
-              </p>
+              <p className="font-bebas text-2xl text-spider-black/50 animate-pulse">DECRYPTING STARK MESSAGES...</p>
             </div>
           ) : filteredConversations.length === 0 ? (
             <div className="p-6 text-center mt-10">

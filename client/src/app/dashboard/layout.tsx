@@ -5,6 +5,7 @@ import { GlitchText } from "@/components/GlitchText";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 import { 
   Home, 
   MessageSquare, 
@@ -67,16 +68,29 @@ export default function DashboardLayout({
     };
   }, [user]);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
 
-  if (loading || !user) {
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-spider-black halftone-bg text-spider-white font-bebas text-4xl">
-        LOADING DASHBOARD...
+      <div className="min-h-screen flex flex-col gap-6 items-center justify-center bg-spider-black halftone-bg">
+        <LoadingAnimation size={300} text="LOADING DASHBOARD..." />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col gap-6 items-center justify-center bg-spider-black halftone-bg text-center p-4">
+        <GlitchText text="SESSION TERMINATED" className="text-4xl md:text-6xl font-bangers text-spider-red mb-4" />
+        <p className="font-fredoka text-spider-white text-lg max-w-md">
+          Your connection to the multiverse has been severed. Please log in again to continue.
+        </p>
+        <Link 
+          href="/login"
+          className="mt-6 px-8 py-3 bg-spider-blue text-white font-bebas text-2xl tracking-wider border-4 border-black rounded-xl shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 transition-all"
+        >
+          RETURN TO LOGIN
+        </Link>
       </div>
     );
   }
