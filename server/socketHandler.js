@@ -171,19 +171,21 @@ module.exports = (io) => {
           data: {
             content: text,
             senderId: dbSenderId,
-            senderName: username,
+            senderName: username || 'Anonymous',
             roomId: roomCode,
             type: 'user'
           }
         }).then((persistedMessage) => {
-          // Create Moderation Log
+          // Determine if it's a DM (roomCode contains '_')
+          const isDM = roomCode.includes('_');
+          
           return prisma.moderationLog.create({
             data: {
               messageId: persistedMessage.id,
-              source: 'ROOM',
+              source: isDM ? 'DIRECT' : 'ROOM',
               roomId: roomCode,
               senderId: dbSenderId,
-              senderName: username,
+              senderName: username || 'Anonymous',
               messageContent: text,
               messageType: 'user',
               isGuest: isGuest,
