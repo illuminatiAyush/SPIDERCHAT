@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
 
   const isAuthPage = req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/signup');
   const isDashboard = req.nextUrl.pathname.startsWith('/dashboard');
-  const isProtectedApi = req.nextUrl.pathname.startsWith('/api') && !req.nextUrl.pathname.startsWith('/api/auth');
+  const isProtectedApi = req.nextUrl.pathname.startsWith('/api') && !req.nextUrl.pathname.startsWith('/api/auth') && !req.nextUrl.pathname.startsWith('/api/admin');
 
   if (!token && isDashboard) {
     return NextResponse.redirect(new URL('/login', req.url));

@@ -51,7 +51,7 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
             SPIDERCHAT
           </span>
         </button>
-        
+
         <div className="flex-1 md:flex-none flex items-center gap-2 bg-spider-black text-spider-white px-3 py-1 skew-x-[-10deg] border-2 border-spider-red">
           <span className="font-bebas text-sm md:text-lg tracking-wider">ROOM: {roomCode}</span>
         </div>
@@ -67,13 +67,12 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
             <span className="text-spider-red text-lg md:text-xl font-bebas">{userCount}</span> <span className="font-bebas">HEROES ACTIVE</span>
           </span>
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={copyRoomLink}
-            className={`flex items-center gap-2 px-3 py-1.5 border-2 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all ${
-              isCopied ? "bg-green-500 text-white" : "bg-spider-blue text-white hover:bg-spider-black"
-            }`}
+            className={`flex items-center gap-2 px-3 py-1.5 border-2 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all ${isCopied ? "bg-green-500 text-white" : "bg-spider-blue text-white hover:bg-spider-black"
+              }`}
           >
             <AnimatePresence mode="wait">
               {isCopied ? (
@@ -90,7 +89,7 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
               {isCopied ? "COPIED!" : "INVITE"}
             </span>
           </button>
-          
+
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 px-3 py-1.5 bg-spider-red text-white border-2 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-spider-black active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
@@ -98,14 +97,14 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
             <LogOut size={18} />
             <span className="font-bebas text-xs md:text-sm uppercase tracking-widest">LEAVE</span>
           </button>
-          <a
+          {/* <a
             href="https://github.com/illuminatiAyush"
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:inline font-bebas text-spider-black/60 hover:text-spider-red text-xs ml-2 transition-colors"
           >
             @illuminatiAyush
-          </a>
+          </a> */}
         </div>
       </div>
     </header>
