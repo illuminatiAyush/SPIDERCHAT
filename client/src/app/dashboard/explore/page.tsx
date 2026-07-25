@@ -1,3 +1,4 @@
+//this is page.tsx 
 "use client";
 
 import { useState, useEffect } from "react";
@@ -39,17 +40,17 @@ export default function ExplorePage() {
 
   const sendFriendRequest = async (userId: string) => {
     if (sentRequests[userId]) return;
-    
+
     // Optimistically set to true to prevent double clicks
     setSentRequests((prev) => ({ ...prev, [userId]: true }));
-    
+
     try {
       const res = await fetch("/api/friends/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ receiverId: userId }),
       });
-      
+
       if (res.ok) {
         socket.emit("send_notification", {
           receiverId: userId,
@@ -88,7 +89,7 @@ export default function ExplorePage() {
         {!loading && query && users.length === 0 && (
           <p className="font-bebas text-2xl text-spider-white">No travelers found.</p>
         )}
-        
+
         {users.map((user) => (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -105,15 +106,14 @@ export default function ExplorePage() {
                 <p className="font-fredoka text-gray-600">{user.displayName || "Traveler"}</p>
               </div>
             </div>
-            
+
             <button
               onClick={() => sendFriendRequest(user.id)}
               disabled={sentRequests[user.id]}
-              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 font-bebas text-xl border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-transform ${
-                sentRequests[user.id] 
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
-                  : "bg-spider-blue text-white hover:bg-spider-black hover:-translate-y-1 active:translate-y-0 active:shadow-none"
-              }`}
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 font-bebas text-xl border-2 border-black rounded shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-transform ${sentRequests[user.id]
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-spider-blue text-white hover:bg-spider-black hover:-translate-y-1 active:translate-y-0 active:shadow-none"
+                }`}
             >
               <UserPlus size={20} />
               {sentRequests[user.id] ? "REQUEST SENT" : "ADD FRIEND"}
