@@ -25,8 +25,15 @@ export default function LandingPage() {
     // Connect as anonymous or authenticated
     const providedUsername = user?.username || "Host_" + Math.floor(Math.random() * 1000);
     socket.auth = { username: providedUsername, userId: user?.id };
-    socket.connect();
-    socket.emit("create_room");
+    
+    if (socket.connected) {
+      socket.emit("create_room");
+    } else {
+      socket.once("connect", () => {
+        socket.emit("create_room");
+      });
+      socket.connect();
+    }
   };
 
   useEffect(() => {
