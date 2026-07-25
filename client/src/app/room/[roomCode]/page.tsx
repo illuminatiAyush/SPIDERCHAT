@@ -115,7 +115,7 @@ export default function RoomPage() {
       socket.off("display_typing");
       socket.off("error_message");
     };
-  }, [mounted, roomCode, router]);
+  }, [mounted, roomCode, router, user, loading]);
 
   if (!mounted || !isJoined || !username || !roomCode) {
     return (
