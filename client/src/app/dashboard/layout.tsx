@@ -106,7 +106,7 @@ export default function DashboardLayout({
   ];
 
   return (
-    <div className="flex h-screen bg-spider-black halftone-bg overflow-hidden text-spider-white">
+    <div className="flex h-[calc(100vh-29px)] md:h-[calc(100vh-33px)] bg-spider-black halftone-bg overflow-hidden text-spider-white">
       {/* Left Sidebar */}
       <nav className="w-20 md:w-64 bg-spider-white border-r-4 border-black flex flex-col justify-between shrink-0">
         <div className="flex flex-col h-full">
@@ -154,7 +154,7 @@ export default function DashboardLayout({
           </div>
 
           {/* User Area / Logout */}
-          <div className="p-2 md:p-4 border-t-4 border-black bg-white flex flex-col gap-3">
+          <div className="p-2 md:p-4 border-t-4 border-black bg-spider-white flex flex-col gap-3">
             <div className="flex items-center justify-center md:justify-start gap-3 md:px-2">
               <div className="w-10 h-10 shrink-0 bg-spider-blue text-white rounded-full flex items-center justify-center border-2 border-black font-bebas text-xl">
                 {user.username.charAt(0).toUpperCase()}
@@ -163,7 +163,7 @@ export default function DashboardLayout({
                 <p className="font-bebas text-spider-black text-lg truncate leading-tight">
                   @{user.username}
                 </p>
-                <p className="font-fredoka text-xs text-gray-500 truncate">
+                <p className="font-fredoka text-xs text-spider-black/60 truncate">
                   {user.displayName || "Multiverse Traveler"}
                 </p>
               </div>

@@ -15,7 +15,7 @@ export default function MessageBubble({ message, isOwn, onReply }: MessageBubble
   if (message.type === 'system') {
     return (
       <div className="flex justify-center my-2">
-        <span className="bg-spider-black text-spider-white px-3 py-1 text-xs font-bebas uppercase tracking-wider skew-x-12 border-2 border-spider-white">
+        <span className="bg-spider-black text-foreground px-3 py-1 text-xs font-bebas uppercase tracking-wider skew-x-12 border-2 border-spider-white">
           {message.text}
         </span>
       </div>
@@ -31,12 +31,12 @@ export default function MessageBubble({ message, isOwn, onReply }: MessageBubble
         isOwn ? "self-end items-end" : "self-start items-start"
       )}
     >
-      <span className="text-xs font-bebas text-spider-black/60 mb-1 px-1">
+      <span className="text-xs font-bebas text-foreground/60 mb-1 px-1">
         {isOwn ? "YOU" : message.username.toUpperCase()} • {message.timestamp}
       </span>
       
       <div className={cn(
-        "relative p-3 border-4 border-black font-fredoka font-bold text-spider-black",
+        "relative p-3 border-4 border-black font-fredoka font-bold text-foreground",
         isOwn 
           ? "bg-spider-red rounded-l-2xl rounded-tr-2xl shadow-[4px_4px_0_rgba(0,0,0,1)]" 
           : "bg-spider-blue rounded-r-2xl rounded-tl-2xl shadow-[-4px_4px_0_rgba(0,0,0,1)] text-white"
@@ -46,7 +46,7 @@ export default function MessageBubble({ message, isOwn, onReply }: MessageBubble
           <div className={cn(
             "mb-2 px-2 py-1.5 rounded-md text-xs border-l-4",
             isOwn 
-              ? "bg-black/15 border-black/40 text-spider-black/80" 
+              ? "bg-black/15 border-black/40 text-foreground/80" 
               : "bg-white/15 border-white/40 text-white/80"
           )}>
             <span className="font-bebas text-[10px] uppercase block mb-0.5">
@@ -74,7 +74,7 @@ export default function MessageBubble({ message, isOwn, onReply }: MessageBubble
         onClick={onReply}
         className={cn(
           "mt-1 flex items-center gap-1 text-[10px] font-bebas uppercase tracking-wider",
-          "text-spider-black/40 hover:text-spider-red transition-colors",
+          "text-foreground/40 hover:text-spider-red transition-colors",
           "opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100",
           "active:opacity-100"
         )}

@@ -142,12 +142,12 @@ export default function AdminDashboard() {
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="comic-panel bg-spider-black text-spider-white p-8 max-w-md w-full border-4 border-spider-red"
+          className="comic-panel bg-spider-black text-spider-black p-8 max-w-md w-full border-4 border-spider-red"
         >
           <div className="text-center mb-8">
             <ShieldAlert className="w-16 h-16 mx-auto text-spider-red mb-4" />
             <h1 className="font-bebas text-4xl text-spider-red">ALCHEMAX SECURE TERMINAL</h1>
-            <p className="font-fredoka text-sm text-spider-white/60">AUTHORIZED PERSONNEL ONLY</p>
+            <p className="font-fredoka text-sm text-spider-black/60">AUTHORIZED PERSONNEL ONLY</p>
           </div>
           
           <form onSubmit={handleLogin} className="space-y-6">
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
             </button>
           </form>
           <div className="mt-6 text-center">
-             <Link href="/" className="font-bebas text-spider-white/60 hover:text-white">← RETURN TO BASE</Link>
+             <Link href="/" className="font-bebas text-spider-black/60 hover:text-white">← RETURN TO BASE</Link>
           </div>
         </motion.div>
       </main>
@@ -261,7 +261,7 @@ export default function AdminDashboard() {
         <div className="bg-black border-4 border-spider-white/20 p-4 min-h-[500px]">
           {activeTab === 'users' && (
             <div className="overflow-x-auto">
-              <table className="w-full text-left font-fredoka text-spider-white">
+              <table className="w-full text-left font-fredoka text-spider-black">
                 <thead>
                   <tr className="border-b-2 border-spider-white/20 text-spider-blue font-bebas text-xl">
                     <th className="p-4">STATUS</th>
@@ -306,9 +306,9 @@ export default function AdminDashboard() {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h4 className="font-bebas text-2xl text-[#39FF14]">{fb.alias}</h4>
-                      <span className="text-spider-white/50 text-sm">{fb.universe || "Unknown Universe"}</span>
+                      <span className="text-spider-black/50 text-sm">{fb.universe || "Unknown Universe"}</span>
                     </div>
-                    <span className="text-sm font-mono text-spider-white/50">{new Date(fb.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true })}</span>
+                    <span className="text-sm font-mono text-spider-black/50">{new Date(fb.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true })}</span>
                   </div>
                   <p className="font-fredoka text-lg whitespace-pre-wrap">{fb.content}</p>
                 </div>
@@ -353,7 +353,7 @@ export default function AdminDashboard() {
                 <div className="p-8 text-center text-spider-red font-bebas text-2xl animate-pulse">DECRYPTING DATA...</div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left font-fredoka text-spider-white">
+                  <table className="w-full text-left font-fredoka text-spider-black">
                     <thead>
                       <tr className="border-b-2 border-spider-white/20 text-spider-red font-bebas text-xl">
                         <th className="p-4">SOURCE</th>
@@ -374,7 +374,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4 font-bold">
                             {msg.senderName}
-                            {msg.isGuest && <span className="ml-2 text-xs font-mono text-spider-white/50">(GUEST)</span>}
+                            {msg.isGuest && <span className="ml-2 text-xs font-mono text-spider-black/50">(GUEST)</span>}
                           </td>
                           <td className="p-4 break-words">
                             {msg.messageContent}

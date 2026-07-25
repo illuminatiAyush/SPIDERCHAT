@@ -92,7 +92,21 @@ export default function MessagesPage() {
     return d.toLocaleDateString([], { month: "short", day: "numeric" });
   };
 
-  const filteredConversations = conversations.filter((conv) => {
+  const uniqueConversations = [];
+  const seenPartners = new Set();
+  
+  for (const conv of conversations) {
+    const other = getOtherParticipant(conv);
+    if (other) {
+      const otherId = other._id || other.id;
+      if (!seenPartners.has(otherId)) {
+        seenPartners.add(otherId);
+        uniqueConversations.push(conv);
+      }
+    }
+  }
+
+  const filteredConversations = uniqueConversations.filter((conv) => {
     if (!searchQuery) return true;
     const other = getOtherParticipant(conv);
     if (!other) return false;
@@ -127,14 +141,14 @@ export default function MessagesPage() {
           <div className="relative">
             <Search
               size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-spider-black/40"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40"
             />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search conversations..."
-              className="w-full pl-10 pr-4 py-2.5 font-fredoka text-sm text-spider-black border-2 border-black/20 rounded-xl focus:outline-none focus:border-spider-blue transition-colors bg-white"
+              className="w-full pl-10 pr-4 py-2.5 font-fredoka text-sm text-foreground border-2 border-black/20 rounded-xl focus:outline-none focus:border-spider-blue transition-colors bg-white"
             />
           </div>
         </div>
@@ -143,17 +157,17 @@ export default function MessagesPage() {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="p-6 text-center">
-              <p className="font-bebas text-2xl text-spider-black/50 animate-pulse">DECRYPTING STARK MESSAGES...</p>
+              <p className="font-bebas text-2xl text-foreground/50 animate-pulse">DECRYPTING STARK MESSAGES...</p>
             </div>
           ) : filteredConversations.length === 0 ? (
             <div className="p-6 text-center mt-10">
               <div className="w-20 h-20 bg-spider-blue/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageSquare size={36} className="text-spider-blue/40" />
               </div>
-              <p className="font-bebas text-2xl text-spider-black/40 mb-2">
+              <p className="font-bebas text-2xl text-foreground/40 mb-2">
                 NO CONVERSATIONS YET
               </p>
-              <p className="font-fredoka text-sm text-spider-black/40">
+              <p className="font-fredoka text-sm text-foreground/40">
                 Head to Friends to start chatting!
               </p>
             </div>
@@ -238,10 +252,10 @@ export default function MessagesPage() {
           <div className="w-24 h-24 bg-spider-blue/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-5xl">💬</span>
           </div>
-          <h2 className="font-bebas text-4xl text-spider-white mb-4">
+          <h2 className="font-bebas text-4xl text-foreground mb-4">
             SELECT A CONVERSATION
           </h2>
-          <p className="font-fredoka text-spider-white/70 text-lg">
+          <p className="font-fredoka text-foreground/70 text-lg">
             Choose a chat from the sidebar to start messaging across the
             multiverse!
           </p>

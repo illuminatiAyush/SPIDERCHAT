@@ -27,7 +27,7 @@ export default function ChatWindow({ messages, currentUsername, onReply }: ChatW
       {messages.length === 0 && (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-8 opacity-40">
           <div className="text-8xl mb-4 group-hover:animate-bounce transform rotate-12 transition-transform">⚡</div>
-          <h3 className="text-3xl font-bebas text-spider-black mb-2 uppercase">Silence in the Multiverse</h3>
+          <h3 className="text-3xl font-bebas text-foreground mb-2 uppercase">Silence in the Multiverse</h3>
           <p className="font-fredoka max-w-xs">No signals detected from this dimension yet. Be the first to break the void!</p>
         </div>
       )}

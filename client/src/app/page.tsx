@@ -10,7 +10,6 @@ import { socket } from "@/lib/socket";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { GlitchText } from "@/components/GlitchText";
-import { HangingWebs } from "@/components/HangingWebs";
 import { LoadingAnimation } from "@/components/LoadingAnimation";
 import { AnimatedTagline } from "@/components/AnimatedTagline";
 import Footer from "@/components/Footer";
@@ -86,7 +85,7 @@ export default function LandingPage() {
             <div className="relative">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="font-bebas text-xl text-spider-black bg-spider-white border-2 border-black px-4 py-2 hover:bg-spider-blue hover:text-white transition-colors shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                className="font-bebas text-xl text-foreground bg-spider-white border-2 border-black px-4 py-2 hover:bg-spider-blue hover:text-white transition-colors shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
               >
                 {user.username} ▼
               </button>
@@ -94,13 +93,13 @@ export default function LandingPage() {
                 <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] z-50 flex flex-col">
                   <Link
                     href="/dashboard"
-                    className="font-fredoka text-left px-4 py-2 text-spider-black hover:bg-spider-blue hover:text-white transition-colors border-b-2 border-black"
+                    className="font-fredoka text-left px-4 py-2 text-foreground hover:bg-spider-blue hover:text-white transition-colors border-b-2 border-black"
                   >
                     Dashboard
                   </Link>
                   <button
                     onClick={logout}
-                    className="font-fredoka text-left px-4 py-2 text-spider-black hover:bg-spider-red hover:text-white transition-colors"
+                    className="font-fredoka text-left px-4 py-2 text-foreground hover:bg-spider-red hover:text-white transition-colors"
                   >
                     Logout
                   </button>
@@ -127,9 +126,21 @@ export default function LandingPage() {
 
         {/* Animated Background Elements */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          {/* Hero Background Image */}
+          <div className="absolute inset-0 opacity-40 mix-blend-screen md:opacity-50">
+            <Image 
+              src="/landingbg.jpg" 
+              alt="Spider-Verse Background" 
+              fill
+              className="object-cover object-center"
+              priority
+              unoptimized={true}
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-spider-black/50 to-spider-black" />
+          
           <div className="absolute top-10 left-10 w-64 h-64 bg-spider-red opacity-10 blur-3xl rounded-full animate-pulse" />
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-spider-blue opacity-10 blur-3xl rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
-          <HangingWebs />
         </div>
 
         <div className="z-10 text-center max-w-4xl w-full mt-16">
@@ -139,7 +150,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, type: "spring" }}
             className="flex flex-col items-center"
           >
-            <span className="relative h-24 w-24 md:h-32 md:w-32 flex-shrink-0 rounded-full overflow-hidden border-4 border-spider-black shadow-[4px_4px_0_rgba(0,0,0,1)] mb-4">
+            <span className="relative h-24 w-24 md:h-32 md:w-32 flex-shrink-0 rounded-full overflow-hidden border-4 border-black shadow-[4px_4px_0_rgba(0,0,0,1)] mb-4">
               <Image
                 src="/spider.png"
                 alt="SpiderChat"
@@ -244,7 +255,7 @@ export default function LandingPage() {
             <div className="bg-spider-blue/20 p-8 rounded-3xl border-4 border-spider-blue/30 backdrop-blur-sm">
               <div className="flex justify-center flex-wrap gap-4 mb-12">
                 <GlitchText text="WHY" textColorClass="text-spider-blue" className="text-5xl md:text-6xl" />
-                <GlitchText text="SPIDERCHAT?" textColorClass="text-spider-white" className="text-5xl md:text-6xl" />
+                <GlitchText text="SPIDERCHAT?" textColorClass="text-foreground" className="text-5xl md:text-6xl" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[
@@ -268,7 +279,7 @@ export default function LandingPage() {
           {/* Multiverse Scenarios Section */}
           <section className="mt-32 mb-20 w-full text-left">
             <div className="flex justify-start flex-wrap gap-4 mb-12">
-              <GlitchText text="CANON" textColorClass="text-spider-white" className="text-5xl md:text-6xl" />
+              <GlitchText text="CANON" textColorClass="text-foreground" className="text-5xl md:text-6xl" />
               <GlitchText text="EVENTS" textColorClass="text-spider-red" className="text-5xl md:text-6xl" />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

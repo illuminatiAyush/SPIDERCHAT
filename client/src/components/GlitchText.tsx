@@ -82,6 +82,18 @@ export function GlitchText({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultText, textColorClass, JSON.stringify(glitchVariants)]);
 
+  const renderFormattedText = (textContent: string) => {
+    if (textContent.includes("CHAT")) {
+      const parts = textContent.split("CHAT");
+      return (
+        <>
+          {parts[0]}<span className="text-spider-blue">CHAT</span>{parts[1]}
+        </>
+      );
+    }
+    return textContent;
+  };
+
   return (
     <div className={clsx("spiderverse-logo-wrapper relative inline-block", className)}>
       <div
@@ -96,7 +108,7 @@ export function GlitchText({
         <span className="logo-layer logo-layer-red" aria-hidden="true">{text}</span>
         <span className="logo-layer logo-layer-cyan" aria-hidden="true">{text}</span>
         <span className="logo-layer logo-layer-blue" aria-hidden="true">{text}</span>
-        <span className="logo-layer logo-layer-base">{text}</span>
+        <span className="logo-layer logo-layer-base">{renderFormattedText(text)}</span>
       </div>
     </div>
   );

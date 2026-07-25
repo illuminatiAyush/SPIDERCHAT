@@ -50,14 +50,24 @@ export default function MessageInput({ roomCode, username, replyingTo, onCancelR
   };
 
   useEffect(() => {
-    if (text.length > 0 && !isTyping) {
-      setIsTyping(true);
-      socket.emit("typing", { roomCode, username, isTyping: true });
+    if (text.length > 0) {
+      if (!isTyping) {
+        setIsTyping(true);
+        socket.emit("typing", { roomCode, username, isTyping: true });
+      }
+      
+      // Clear typing indicator after 3 seconds of inactivity
+      const timeout = setTimeout(() => {
+        setIsTyping(false);
+        socket.emit("typing", { roomCode, username, isTyping: false });
+      }, 3000);
+      
+      return () => clearTimeout(timeout);
     } else if (text.length === 0 && isTyping) {
       setIsTyping(false);
       socket.emit("typing", { roomCode, username, isTyping: false });
     }
-  }, [text, isTyping, roomCode, username]);
+  }, [text, roomCode, username]);
 
   // Auto-focus input when replying to a message
   useEffect(() => {

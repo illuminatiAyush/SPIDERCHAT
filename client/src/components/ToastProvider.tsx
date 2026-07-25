@@ -62,9 +62,9 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({ toast, on
       case 'error':
         return 'bg-red-500 border-red-700 text-white';
       case 'message':
-        return 'bg-spider-blue border-spider-black text-white';
+        return 'bg-spider-blue border-black text-white';
       default:
-        return 'bg-white border-spider-black text-spider-black';
+        return 'bg-white border-black text-spider-black';
     }
   };
 

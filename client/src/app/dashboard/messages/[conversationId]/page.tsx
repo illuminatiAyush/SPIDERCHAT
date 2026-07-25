@@ -480,7 +480,7 @@ export default function ConversationPage() {
                 <div className={`max-w-[70%] ${isMine ? "items-end" : "items-start"} flex flex-col`}>
                   {/* Sender name */}
                   {!isMine && showAvatar && (
-                    <span className="font-bebas text-xs text-spider-white/60 ml-1 mb-1">
+                    <span className="font-bebas text-xs text-foreground/60 ml-1 mb-1">
                       {getSenderName(msg)}
                     </span>
                   )}
@@ -491,7 +491,7 @@ export default function ConversationPage() {
                       className={`text-xs px-3 py-1.5 mb-0.5 rounded-t-lg border-l-4 ${
                         isMine
                           ? "bg-spider-blue/30 border-spider-blue/60 text-white/70"
-                          : "bg-spider-white/10 border-spider-red/60 text-spider-white/60"
+                          : "bg-spider-white/10 border-spider-red/60 text-foreground/60"
                       }`}
                     >
                       <span className="font-bebas">
@@ -508,7 +508,7 @@ export default function ConversationPage() {
                     className={`relative px-4 py-2.5 rounded-2xl ${
                       isMine
                         ? "bg-spider-blue text-white rounded-br-md border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
-                        : "bg-spider-white text-spider-black rounded-bl-md border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                        : "bg-spider-white text-foreground rounded-bl-md border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
                     }`}
                   >
                     {/* Image message */}
@@ -532,7 +532,7 @@ export default function ConversationPage() {
                     >
                       <span
                         className={`text-[10px] font-fredoka ${
-                          isMine ? "text-white/50" : "text-spider-black/40"
+                          isMine ? "text-white/50" : "text-foreground/40"
                         }`}
                       >
                         {formatMessageTime(msg.createdAt)}
@@ -540,7 +540,7 @@ export default function ConversationPage() {
                       {msg.editedAt && (
                         <span
                           className={`text-[10px] italic ${
-                            isMine ? "text-white/40" : "text-spider-black/30"
+                            isMine ? "text-white/40" : "text-foreground/30"
                           }`}
                         >
                           (edited)
@@ -645,7 +645,7 @@ export default function ConversationPage() {
                 alt=""
                 className="w-8 h-8 rounded-full border-2 border-black bg-spider-red object-cover mr-2 shrink-0"
               />
-              <div className="bg-spider-white text-spider-black px-4 py-2.5 rounded-2xl rounded-bl-md border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+              <div className="bg-spider-white text-foreground px-4 py-2.5 rounded-2xl rounded-bl-md border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
                 <div className="flex gap-1.5 items-center h-4">
                   <span className="w-1.5 h-1.5 bg-spider-black/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                   <span className="w-1.5 h-1.5 bg-spider-black/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -668,14 +668,14 @@ export default function ConversationPage() {
               <p className="font-bebas text-xs text-spider-blue">
                 Replying to {getSenderName(replyingTo)}
               </p>
-              <p className="font-fredoka text-xs text-spider-white/60 truncate">
+              <p className="font-fredoka text-xs text-foreground/60 truncate">
                 {replyingTo.content}
               </p>
             </div>
           </div>
           <button
             onClick={() => setReplyingTo(null)}
-            className="text-spider-white/40 hover:text-white text-xl ml-4"
+            className="text-foreground/40 hover:text-white text-xl ml-4"
           >
             ✕
           </button>
@@ -700,7 +700,7 @@ export default function ConversationPage() {
               handleTyping();
             }}
             placeholder="Type a message..."
-            className="flex-1 px-4 py-3 font-fredoka text-spider-black border-2 border-black rounded-xl focus:outline-none focus:ring-2 focus:ring-spider-blue bg-white shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+            className="flex-1 px-4 py-3 font-fredoka text-foreground border-2 border-black rounded-xl focus:outline-none focus:ring-2 focus:ring-spider-blue bg-white shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
           />
           <motion.button
             whileHover={{ scale: 1.05 }}

@@ -25,7 +25,7 @@ export default function SupportPage() {
             textColorClass="text-spider-red"
             className="text-6xl md:text-8xl drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wider"
           />
-          <p className="font-fredoka text-xl text-spider-white mt-4 italic">Guy in the chair, standing by.</p>
+          <p className="font-fredoka text-xl text-spider-black mt-4 italic">Guy in the chair, standing by.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -58,9 +58,9 @@ export default function SupportPage() {
           </motion.div>
         </div>
         
-        <div className="mt-12 text-center bg-black/60 p-6 border-4 border-spider-black rounded-xl backdrop-blur-sm">
-           <h3 className="font-bebas text-3xl text-spider-white mb-2">DIRECT COMM-LINK</h3>
-           <p className="font-fredoka text-spider-white/80 text-lg">
+        <div className="mt-12 text-center bg-black/60 p-6 border-4 border-black rounded-xl backdrop-blur-sm">
+           <h3 className="font-bebas text-3xl text-spider-black mb-2">DIRECT COMM-LINK</h3>
+           <p className="font-fredoka text-spider-black/80 text-lg">
              For extreme emergencies, contact the Spider Society HQ at: <br/>
              <span className="text-spider-blue font-bold tracking-wider">SUPPORT@SPIDERCHAT.MULTIVERSE</span>
            </p>

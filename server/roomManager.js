@@ -2,18 +2,17 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Room Manager to handle room states and user limits.
- * Implements simple JSON persistence to survive server restarts.
+ * Room Manager to handle room states, limits, and Owner permissions.
  */
 class RoomManager {
   constructor() {
     this.persistencePath = path.join(__dirname, 'data', 'rooms.json');
-    this.rooms = new Map(); // roomCode -> { users: Map(socketId -> username), messages: [], ... }
+    this.rooms = new Map();
     this.maxUsers = 100;
     
     this.loadFromPersistence();
 
-    // Cleanup stale rooms every 2 minutes
+    // Cleanup stale rooms every 2 minutes (just in case)
     setInterval(() => this.cleanupRooms(), 2 * 60 * 1000);
   }
 
@@ -27,7 +26,9 @@ class RoomManager {
       for (const [code, room] of this.rooms.entries()) {
         data[code] = {
           ...room,
-          users: Array.from(room.users.entries()) // Convert Map to Array for JSON
+          users: Array.from(room.users.entries()), // Convert Map to Array for JSON
+          mutedSockets: Array.from(room.mutedSockets),
+          bannedSockets: Array.from(room.bannedSockets)
         };
       }
       fs.writeFileSync(this.persistencePath, JSON.stringify(data, null, 2));
@@ -45,9 +46,15 @@ class RoomManager {
           const room = data[code];
           // Clear users on load — old socket IDs are invalid after restart
           room.users = new Map();
+          room.mutedSockets = new Set(room.mutedSockets || []);
+          room.bannedSockets = new Set(room.bannedSockets || []);
+          room.ownerSocketId = null; // No one is owner if everyone disconnected
           this.rooms.set(code, room);
         }
-        console.log(`Restored ${Object.keys(data).length} rooms from persistence (users cleared).`);
+        console.log(`Restored ${Object.keys(data).length} rooms from persistence.`);
+        
+        // Immediately cleanup any rooms that are now empty due to restart
+        this.cleanupRooms(true); 
       }
     } catch (err) {
       console.error('Failed to load rooms from persistence:', err);
@@ -78,6 +85,14 @@ class RoomManager {
 
     const roomData = {
       users: new Map(),
+      ownerSocketId: null,
+      mutedSockets: new Set(),
+      bannedSockets: new Set(),
+      locked: false,
+      slowMode: 0,
+      pinnedMessage: null,
+      roomTitle: roomCode,
+      roomDescription: 'A transient dimension in the Spider-Verse.',
       messages: [],
       createdAt: Date.now(),
       lastActive: Date.now()
@@ -98,34 +113,62 @@ class RoomManager {
       console.log(`[RoomManager] Auto-creating dimension: ${roomCode} for user ${username}`);
       const newRoomData = {
         users: new Map(),
+        ownerSocketId: null,
+        mutedSockets: new Set(),
+        bannedSockets: new Set(),
+        locked: false,
+        slowMode: 0,
+        pinnedMessage: null,
+        roomTitle: roomCode,
+        roomDescription: 'A transient dimension in the Spider-Verse.',
         messages: [],
         createdAt: Date.now(),
         lastActive: Date.now()
       };
       this.rooms.set(roomCode, newRoomData);
-      this.saveToPersistence();
       room = newRoomData;
+    }
+
+    // CHECK BAN
+    if (room.bannedSockets.has(socketId)) {
+      return { error: "You have been banned from this dimension by the Room Owner." };
+    }
+
+    // CHECK LOCK (allow existing users to reconnect if they are already in the map, but technically they are removed on disconnect)
+    if (room.locked) {
+      return { error: "This dimension has been locked." };
     }
 
     if (room.users.size >= this.maxUsers) return { error: "Dimension full! Try another universe." };
 
     // Check for duplicate username in this room
     const existingUsers = Array.from(room.users.entries());
-    const duplicateEntry = existingUsers.find(([, name]) => name === username);
+    const duplicateEntry = existingUsers.find(([, data]) => data.username === username);
     
     if (duplicateEntry) {
       const [oldSocketId] = duplicateEntry;
       if (oldSocketId !== socketId) {
-        // Same username reconnecting from a new socket (e.g. page refresh) — remove old entry
         room.users.delete(oldSocketId);
         console.log(`[RoomManager] Replacing stale socket for ${username} (old: ${oldSocketId}, new: ${socketId})`);
+        
+        // Transfer owner identity if they were the owner
+        if (room.ownerSocketId === oldSocketId) {
+          room.ownerSocketId = socketId;
+        }
       } else {
-        // Same socket re-joining — no-op, already in room
         return { success: true, room };
       }
     }
 
-    room.users.set(socketId, username);
+    // Add user
+    room.users.set(socketId, { username });
+    
+    // Assign owner if none exists
+    if (!room.ownerSocketId) {
+      room.ownerSocketId = socketId;
+      console.log(`[RoomManager] ${username} (${socketId}) is now the owner of ${roomCode}`);
+    }
+
     room.lastActive = Date.now();
     this.saveToPersistence();
     return { success: true, room };
@@ -134,11 +177,29 @@ class RoomManager {
   leaveRoom(socketId) {
     for (const [roomCode, room] of this.rooms.entries()) {
       if (room.users.has(socketId)) {
-        const username = room.users.get(socketId);
+        const userData = room.users.get(socketId);
+        const username = userData.username;
         room.users.delete(socketId);
+        
+        // Immediately destroy room if empty
+        if (room.users.size === 0) {
+          console.log(`[RoomManager] Dimension ${roomCode} collapsed (0 participants).`);
+          this.rooms.delete(roomCode);
+          this.saveToPersistence();
+          return { roomCode, username, roomDeleted: true };
+        }
+
+        // Reassign owner if the owner left
+        if (room.ownerSocketId === socketId) {
+          const nextOwnerSocketId = Array.from(room.users.keys())[0]; // Oldest active participant
+          room.ownerSocketId = nextOwnerSocketId;
+          const nextOwner = room.users.get(nextOwnerSocketId);
+          console.log(`[RoomManager] Ownership of ${roomCode} transferred to ${nextOwner.username}`);
+        }
+
         room.lastActive = Date.now();
         this.saveToPersistence();
-        return { roomCode, username };
+        return { roomCode, username, roomDeleted: false };
       }
     }
     return null;
@@ -146,18 +207,26 @@ class RoomManager {
 
   getUsersInRoom(roomCode) {
     const room = this.getRoom(roomCode);
-    return room ? Array.from(room.users.values()) : [];
+    if (!room) return [];
+    
+    // Return array of user objects with permissions for client UI
+    return Array.from(room.users.entries()).map(([socketId, data]) => ({
+      socketId,
+      username: data.username,
+      isOwner: room.ownerSocketId === socketId,
+      isMuted: room.mutedSockets.has(socketId)
+    }));
   }
 
-  cleanupRooms() {
+  cleanupRooms(forceEmptyDelete = false) {
     const NOW = Date.now();
-    const GRACE_PERIOD = 10 * 60 * 1000; // 10 minutes grace for empty rooms
-    const STALE_PERIOD = 60 * 60 * 1000; // 60 minutes max age
+    const GRACE_PERIOD = 10 * 60 * 1000; // 10 mins grace for empty
+    const STALE_PERIOD = 60 * 60 * 1000; // 60 mins max
     let changed = false;
 
     for (const [roomCode, room] of this.rooms.entries()) {
       const isStale = (NOW - room.createdAt) > STALE_PERIOD;
-      const isEmpty = room.users.size === 0 && (NOW - room.lastActive) > GRACE_PERIOD;
+      const isEmpty = room.users.size === 0 && (forceEmptyDelete || (NOW - room.lastActive) > GRACE_PERIOD);
 
       if (isStale || isEmpty) {
         this.rooms.delete(roomCode);

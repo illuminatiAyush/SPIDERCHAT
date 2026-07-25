@@ -7,8 +7,9 @@ import { useParams, useRouter } from "next/navigation";
 import { socket } from "@/lib/socket";
 import ChatWindow from "@/components/ChatWindow";
 import MessageInput from "@/components/MessageInput";
-import UserList from "@/components/UserList";
+import UserList, { RoomUser } from "@/components/UserList";
 import RoomHeader from "@/components/RoomHeader";
+import RoomAdminModal from "@/components/RoomAdminModal";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
 import { LoadingAnimation } from "@/components/LoadingAnimation";
@@ -32,11 +33,17 @@ export default function RoomPage() {
   
   const [username, setUsername] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [users, setUsers] = useState<string[]>([]);
+  const [users, setUsers] = useState<RoomUser[]>([]);
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  
+  // Room State
+  const [roomTitle, setRoomTitle] = useState(roomCode);
+  const [isLocked, setIsLocked] = useState(false);
+  const [slowMode, setSlowMode] = useState(0);
+  const [showAdminModal, setShowAdminModal] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -75,7 +82,7 @@ export default function RoomPage() {
       onConnect();
     }
 
-    socket.on("user_list", (userList: string[]) => {
+    socket.on("user_list", (userList: RoomUser[]) => {
       setUsers(userList || []);
     });
 
@@ -104,6 +111,27 @@ export default function RoomPage() {
       alert(error);
       router.push("/join");
     });
+    
+    // Admin Events
+    socket.on("kicked", (reason: string) => {
+      alert(`[SYSTEM OVERRIDE]: ${reason}`);
+      router.push("/join");
+    });
+
+    socket.on("room_deleted", (reason: string) => {
+      alert(`[DIMENSION COLLAPSE]: ${reason}`);
+      router.push("/");
+    });
+
+    socket.on("room_cleared", () => {
+      setMessages([]);
+    });
+
+    socket.on("room_updated", (data: any) => {
+      if (data.title !== undefined) setRoomTitle(data.title);
+      if (data.locked !== undefined) setIsLocked(data.locked);
+      if (data.slowMode !== undefined) setSlowMode(data.slowMode);
+    });
 
     setIsJoined(true);
 
@@ -114,6 +142,10 @@ export default function RoomPage() {
       socket.off("receive_message");
       socket.off("display_typing");
       socket.off("error_message");
+      socket.off("kicked");
+      socket.off("room_deleted");
+      socket.off("room_cleared");
+      socket.off("room_updated");
     };
   }, [mounted, roomCode, router, user, loading]);
 
@@ -125,9 +157,18 @@ export default function RoomPage() {
     );
   }
 
+  const currentUser = users.find(u => u.socketId === socket.id);
+  const isOwner = currentUser?.isOwner || false;
+  const isMuted = currentUser?.isMuted || false;
+
   return (
-    <main className="h-[100dvh] flex flex-col bg-spider-black halftone-bg overflow-hidden p-0 md:p-4 gap-0 md:gap-4">
-      <RoomHeader roomCode={roomCode} userCount={users.length} />
+    <main className="h-[calc(100dvh-29px)] md:h-[calc(100dvh-33px)] flex flex-col bg-spider-black halftone-bg overflow-hidden p-0 md:p-4 gap-0 md:gap-4">
+      <RoomHeader 
+        roomCode={roomTitle} 
+        userCount={users.length} 
+        isOwner={isOwner}
+        onOpenAdmin={() => setShowAdminModal(true)}
+      />
       
       <div className="flex-1 flex flex-col md:flex-row gap-0 md:gap-4 overflow-hidden relative">
         <div className="flex-1 flex flex-col overflow-hidden bg-spider-white comic-panel-mobile md:comic-panel">
@@ -143,26 +184,40 @@ export default function RoomPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="px-4 py-1 text-xs md:text-sm font-fredoka text-spider-black italic bg-spider-white/90 border-t border-spider-black/10"
+                className="px-4 py-1 text-xs md:text-sm font-fredoka text-black italic bg-spider-white/90 border-t border-black/10"
               >
                 {typingUser} is glitching... (typing)
               </motion.div>
             )}
           </AnimatePresence>
           
-          <MessageInput 
-            roomCode={roomCode} 
-            username={username}
-            replyingTo={replyingTo}
-            onCancelReply={() => setReplyingTo(null)}
-          />
+          {isMuted ? (
+            <div className="p-4 bg-gray-200 border-t-4 border-black text-center font-bebas text-2xl text-spider-red flex items-center justify-center gap-2">
+              YOU HAVE BEEN MUTED BY THE ROOM OWNER.
+            </div>
+          ) : (
+            <MessageInput 
+              roomCode={roomCode} 
+              username={username}
+              replyingTo={replyingTo}
+              onCancelReply={() => setReplyingTo(null)}
+            />
+          )}
         </div>
         
         <div className="hidden md:block w-72 bg-spider-white comic-panel">
-          <UserList users={users} />
+          <UserList users={users} roomCode={roomCode} />
         </div>
       </div>
+
+      {showAdminModal && (
+        <RoomAdminModal 
+          roomCode={roomCode}
+          isLocked={isLocked}
+          slowMode={slowMode}
+          onClose={() => setShowAdminModal(false)}
+        />
+      )}
     </main>
   );
 }
-

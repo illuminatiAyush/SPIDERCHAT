@@ -18,7 +18,7 @@ export default function Error({
 
   return (
     <div className="min-h-[400px] flex items-center justify-center p-6">
-      <div className="bg-surface/80 border border-white/5 p-8 rounded-2xl max-w-md w-full text-center space-y-6">
+      <div className="bg-spider-white/80 border border-white/5 p-8 rounded-2xl max-w-md w-full text-center space-y-6">
         <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
           <AlertCircle size={32} />
         </div>

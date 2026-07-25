@@ -55,7 +55,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto w-full h-full">
-      <h1 className="text-4xl md:text-5xl font-bebas text-spider-white mb-6 md:mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+      <h1 className="text-4xl md:text-5xl font-bebas text-spider-blue mb-6 md:mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
         DIMENSIONAL ALERTS
       </h1>
 

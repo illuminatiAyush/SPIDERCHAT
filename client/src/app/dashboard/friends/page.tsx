@@ -44,14 +44,28 @@ export default function FriendsPage() {
     }
   };
 
-  const openChat = (friendId: string) => {
-    // Route to the new Dashboard Chat System for 1-on-1 DMs
-    router.push(`/dashboard/messages/${friendId}`);
+  const openChat = async (friendId: string) => {
+    if (!user) return;
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ partnerId: friendId })
+      });
+      const data = await res.json();
+      if (res.ok && data.conversationId) {
+        router.push(`/dashboard/messages/${data.conversationId}`);
+      } else {
+        console.error("Failed to start DM:", data.error);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto w-full h-full">
-      <h1 className="text-4xl md:text-5xl font-bebas text-spider-white mb-6 md:mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+      <h1 className="text-4xl md:text-5xl font-bebas text-spider-blue mb-6 md:mb-8 transform -skew-x-6 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
         YOUR MULTIVERSE SQUAD
       </h1>
 

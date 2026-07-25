@@ -26,7 +26,7 @@ export function AnimatedTagline() {
   }, []);
 
   return (
-    <div className="relative font-fredoka text-xl md:text-3xl text-spider-white italic mb-12 transform -rotate-2 drop-shadow-[2px_2px_0_rgba(0,0,0,1)] h-8 md:h-10 flex items-center justify-center overflow-visible w-full">
+    <div className="relative font-fredoka text-xl md:text-3xl text-foreground italic mb-12 transform -rotate-2 drop-shadow-[2px_2px_0_rgba(0,0,0,1)] h-8 md:h-10 flex items-center justify-center overflow-visible w-full">
       <AnimatePresence>
         <motion.p
           key={index}

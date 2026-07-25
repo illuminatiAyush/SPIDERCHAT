@@ -47,18 +47,20 @@ export default function DashboardHome() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch both friends and requests concurrently
-      const [friendsRes, reqRes] = await Promise.all([
+      // Fetch friends, requests, and conversations concurrently
+      const [friendsRes, reqRes, convRes] = await Promise.all([
         fetch("/api/friends/list"),
-        fetch("/api/friends/requests")
+        fetch("/api/friends/requests"),
+        fetch("/api/conversations")
       ]);
       
       const friendsData = await friendsRes.json();
       const reqData = await reqRes.json();
+      const convData = await convRes.json();
 
       const friends = friendsData.friends || [];
       const pending = reqData.requests || [];
-      const conversations: any[] = [];
+      const conversations: any[] = convData.conversations || [];
       const notifications: any[] = [];
 
       setStats({
@@ -196,16 +198,24 @@ export default function DashboardHome() {
             </motion.button>
           </div>
           <div className="flex flex-col gap-3">
-            {recentConversations.length === 0 ? (
+            {recentConversations?.length === 0 ? (
               <p className="italic text-spider-white/50 font-fredoka">
                 No conversations yet. Start chatting with your friends!
               </p>
             ) : (
-              recentConversations.map((conv: any) => {
-                const other = conv.participants?.find(
-                  (p: any) => p._id !== user?.id
-                );
-                if (!other) return null;
+              (() => {
+                const seenPartners = new Set();
+                const uniqueConversations = [];
+                for (const conv of (recentConversations || [])) {
+                  const other = conv.participants?.find((p: any) => p._id !== user?.id);
+                  if (other && !seenPartners.has(other._id)) {
+                    seenPartners.add(other._id);
+                    uniqueConversations.push(conv);
+                  }
+                }
+                return uniqueConversations;
+              })().map((conv: any) => {
+                const other = conv.participants?.find((p: any) => p._id !== user?.id);
                 return (
                   <motion.button
                     key={conv._id}
@@ -222,16 +232,16 @@ export default function DashboardHome() {
                         alt=""
                       />
                       <span
-                        className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-spider-black ${
+                        className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-black ${
                           other.isOnline ? "bg-green-500" : "bg-gray-500"
                         }`}
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bebas text-lg text-spider-white leading-none truncate">
+                      <h4 className="font-bebas text-lg text-foreground leading-none truncate">
                         {other.displayName || other.username}
                       </h4>
-                      <p className="font-fredoka text-xs text-spider-white/40 truncate">
+                      <p className="font-fredoka text-xs text-foreground/40 truncate">
                         {conv.lastMessage || "Start chatting!"}
                       </p>
                     </div>
@@ -280,17 +290,17 @@ export default function DashboardHome() {
                       className="w-10 h-10 rounded-full border-2 border-black bg-spider-red object-cover"
                       alt=""
                     />
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-spider-black bg-green-500" />
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-black bg-green-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-bebas text-lg text-spider-white leading-none truncate">
+                    <h4 className="font-bebas text-lg text-foreground leading-none truncate">
                       {friend.displayName || friend.username}
                     </h4>
                     <p className="font-fredoka text-xs text-green-400">
                       🟢 Online now
                     </p>
                   </div>
-                  <MessageSquare size={18} className="text-spider-white/30" />
+                  <MessageSquare size={18} className="text-foreground/30" />
                 </motion.button>
               ))
             )}

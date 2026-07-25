@@ -4,6 +4,9 @@ const { updateUserPresence } = require('./db');
 // Track userId -> Set of socketIds for DM routing
 const userSockets = new Map();
 
+// Track slow mode per room (roomCode -> Map(socketId -> timestamp))
+const roomSlowModeTimers = new Map();
+
 // Rate Limiter for Socket Events
 const socketRateLimit = new Map();
 const MAX_EVENTS_PER_MIN = 60;
@@ -145,6 +148,21 @@ module.exports = (io) => {
         return;
       }
 
+      if (room.mutedSockets.has(socket.id)) {
+        return socket.emit('error_message', 'You are muted in this dimension.');
+      }
+
+      if (room.slowMode > 0) {
+         if (!roomSlowModeTimers.has(roomCode)) roomSlowModeTimers.set(roomCode, new Map());
+         const timers = roomSlowModeTimers.get(roomCode);
+         const lastMsgTime = timers.get(socket.id) || 0;
+         const now = Date.now();
+         if (now - lastMsgTime < room.slowMode * 1000) {
+            return socket.emit('error_message', `Slow mode active. Please wait before transmitting.`);
+         }
+         timers.set(socket.id, now);
+      }
+
       const message = {
         username,
         text,
@@ -210,6 +228,155 @@ module.exports = (io) => {
       socket.to(roomCode).emit('display_typing', { username, isTyping });
     });
 
+    // ============= ROOM ADMIN EVENTS =============
+    const requireOwner = (roomCode, socketId) => {
+      const room = roomManager.getRoom(roomCode);
+      if (!room) return null;
+      if (room.ownerSocketId !== socketId) {
+         socket.emit('error_message', 'You do not have permission to perform this action.');
+         return null;
+      }
+      return room;
+    };
+
+    socket.on('room_user_kick', ({ roomCode, targetSocketId }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       if (targetSocketId === socket.id) return socket.emit('error_message', "You cannot remove yourself.");
+       
+       room.bannedSockets.add(targetSocketId);
+       const targetUser = room.users.get(targetSocketId);
+       if (targetUser) {
+           io.to(targetSocketId).emit('kicked', 'You were removed by the Room Owner.');
+           const targetSocket = io.sockets.sockets.get(targetSocketId);
+           if (targetSocket) {
+             targetSocket.leave(roomCode);
+             roomManager.leaveRoom(targetSocketId);
+           }
+           io.to(roomCode).emit('receive_message', {
+             username: 'SYSTEM',
+             text: `Variant ${targetUser.username} has been removed by the Room Owner.`,
+             timestamp: new Date().toLocaleTimeString(),
+             type: 'system'
+           });
+           io.to(roomCode).emit('user_list', roomManager.getUsersInRoom(roomCode));
+       }
+    });
+
+    socket.on('room_user_mute', ({ roomCode, targetSocketId }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       if (targetSocketId === socket.id) return socket.emit('error_message', "You cannot mute yourself.");
+       room.mutedSockets.add(targetSocketId);
+       roomManager.saveToPersistence();
+       io.to(roomCode).emit('user_list', roomManager.getUsersInRoom(roomCode));
+    });
+
+    socket.on('room_user_unmute', ({ roomCode, targetSocketId }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       room.mutedSockets.delete(targetSocketId);
+       roomManager.saveToPersistence();
+       io.to(roomCode).emit('user_list', roomManager.getUsersInRoom(roomCode));
+    });
+
+    socket.on('room_lock', ({ roomCode }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       room.locked = true;
+       roomManager.saveToPersistence();
+       io.to(roomCode).emit('room_updated', { locked: true });
+       io.to(roomCode).emit('receive_message', {
+             username: 'SYSTEM',
+             text: `This Dimension has been Locked.`,
+             timestamp: new Date().toLocaleTimeString(),
+             type: 'system'
+       });
+    });
+
+    socket.on('room_unlock', ({ roomCode }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       room.locked = false;
+       roomManager.saveToPersistence();
+       io.to(roomCode).emit('room_updated', { locked: false });
+       io.to(roomCode).emit('receive_message', {
+             username: 'SYSTEM',
+             text: `This Dimension has been Unlocked.`,
+             timestamp: new Date().toLocaleTimeString(),
+             type: 'system'
+       });
+    });
+
+    socket.on('room_update', ({ roomCode, title, description, slowMode }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       if (title !== undefined) room.roomTitle = title;
+       if (description !== undefined) room.description = description;
+       if (slowMode !== undefined) room.slowMode = slowMode;
+       roomManager.saveToPersistence();
+       io.to(roomCode).emit('room_updated', { title: room.roomTitle, description: room.description, slowMode: room.slowMode });
+    });
+
+    socket.on('room_clear', ({ roomCode }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       room.messages = [];
+       roomManager.saveToPersistence();
+       io.to(roomCode).emit('room_cleared');
+       io.to(roomCode).emit('receive_message', {
+             username: 'SYSTEM',
+             text: `The Spider-Web has been cleared by the Room Owner.`,
+             timestamp: new Date().toLocaleTimeString(),
+             type: 'system'
+       });
+    });
+
+    socket.on('room_pin_message', ({ roomCode, message }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       room.pinnedMessage = message;
+       roomManager.saveToPersistence();
+       io.to(roomCode).emit('room_updated', { pinnedMessage: message });
+       io.to(roomCode).emit('receive_message', {
+             username: 'SYSTEM',
+             text: `A message was pinned to the Spider-Web.`,
+             timestamp: new Date().toLocaleTimeString(),
+             type: 'system'
+       });
+    });
+
+    socket.on('room_owner_transfer', ({ roomCode, targetSocketId }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       if (targetSocketId === socket.id) return;
+       if (room.users.has(targetSocketId)) {
+          room.ownerSocketId = targetSocketId;
+          roomManager.saveToPersistence();
+          const targetUser = room.users.get(targetSocketId);
+          io.to(roomCode).emit('user_list', roomManager.getUsersInRoom(roomCode));
+          io.to(roomCode).emit('receive_message', {
+             username: 'SYSTEM',
+             text: `Ownership Transferred to ${targetUser.username}.`,
+             timestamp: new Date().toLocaleTimeString(),
+             type: 'system'
+          });
+       }
+    });
+
+    socket.on('room_delete', ({ roomCode }) => {
+       const room = requireOwner(roomCode, socket.id);
+       if (!room) return;
+       io.to(roomCode).emit('room_deleted', 'This universe has collapsed.');
+       io.in(roomCode).fetchSockets().then(sockets => {
+           for (const s of sockets) {
+               s.leave(roomCode);
+           }
+       });
+       roomManager.rooms.delete(roomCode);
+       roomManager.saveToPersistence();
+    });
+
     // ============= DIRECT MESSAGES (Phase 3) =============
 
     // We no longer need join_dm / leave_dm as we route directly via userSockets
@@ -269,23 +436,46 @@ module.exports = (io) => {
           }
         }
 
-        // Create Moderation Log (fire-and-forget)
-        prisma.moderationLog.create({
-          data: {
-            messageId: message._id,
-            source: 'DM',
-            conversationId: conversationId, 
-            senderId: userId,
-            senderName: username,
-            recipientId: receiverId,
-            messageContent: content,
-            messageType: type || 'text',
-            isGuest: false,
-            isAuthenticated: true
-          }
-        }).then((modLog) => {
+        // Save to Database: DirectMessage, update Conversation, and ModerationLog
+        try {
+          const [savedMessage, updatedConv, modLog] = await prisma.$transaction([
+            prisma.directMessage.create({
+              data: {
+                id: message._id,
+                conversationId: conversationId,
+                senderId: userId,
+                content: content,
+                type: type || 'text',
+                replyTo: replyTo ? JSON.stringify(replyTo) : null
+              }
+            }),
+            prisma.conversation.update({
+              where: { id: conversationId },
+              data: {
+                lastMessage: content,
+                lastMessageAt: new Date(),
+              }
+            }),
+            prisma.moderationLog.create({
+              data: {
+                messageId: message._id,
+                source: 'DM',
+                conversationId: conversationId, 
+                senderId: userId,
+                senderName: username,
+                recipientId: receiverId,
+                messageContent: content,
+                messageType: type || 'text',
+                isGuest: false,
+                isAuthenticated: true
+              }
+            })
+          ]);
+          
           io.to('admin_dashboard').emit('moderation:new', modLog);
-        }).catch(err => console.error('[Socket] Failed to persist DM mod log:', err));
+        } catch (dbErr) {
+          console.error('[Socket DM] Failed to persist DM or mod log:', dbErr);
+        }
       } catch (err) {
         console.error('[Socket] Error in dm_send:', err);
       }
@@ -411,17 +601,17 @@ module.exports = (io) => {
       // Room chat cleanup
       const leaveData = roomManager.leaveRoom(socket.id);
       if (leaveData) {
-        const { roomCode, username } = leaveData;
-        const remainingUsers = roomManager.getUsersInRoom(roomCode);
-        
-        io.to(roomCode).emit('user_list', remainingUsers);
-        io.to(roomCode).emit('receive_message', {
-          username: 'SYSTEM',
-          text: `${username} has left the multiverse.`,
-          timestamp: new Date().toLocaleTimeString(),
-          type: 'system'
-        });
-        
+        const { roomCode, username, roomDeleted } = leaveData;
+        if (!roomDeleted) {
+          const remainingUsers = roomManager.getUsersInRoom(roomCode);
+          io.to(roomCode).emit('user_list', remainingUsers);
+          io.to(roomCode).emit('receive_message', {
+            username: 'SYSTEM',
+            text: `${username} has left the multiverse.`,
+            timestamp: new Date().toLocaleTimeString(),
+            type: 'system'
+          });
+        }
         console.log(`[Socket] ${username} left room ${roomCode}`);
       }
 

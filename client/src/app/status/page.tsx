@@ -45,12 +45,12 @@ export default function StatusPage() {
         >
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
-              <div className="w-12 h-12 border-4 border-spider-black border-t-green-500 rounded-full animate-spin" />
+              <div className="w-12 h-12 border-4 border-black border-t-green-500 rounded-full animate-spin" />
               <h2 className="font-bebas text-2xl animate-pulse">SCANNING DIMENSIONAL NODES...</h2>
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 border-2 border-spider-black bg-green-500/10">
+              <div className="flex items-center justify-between p-4 border-2 border-black bg-green-500/10">
                 <div className="flex items-center gap-4">
                   <Check className="text-green-600 w-8 h-8" />
                   <h3 className="font-bebas text-2xl">Earth-616 Routing</h3>
@@ -58,7 +58,7 @@ export default function StatusPage() {
                 <span className="font-fredoka font-bold text-green-600">OPERATIONAL</span>
               </div>
 
-              <div className="flex items-center justify-between p-4 border-2 border-spider-black bg-green-500/10">
+              <div className="flex items-center justify-between p-4 border-2 border-black bg-green-500/10">
                 <div className="flex items-center gap-4">
                   <Check className="text-green-600 w-8 h-8" />
                   <h3 className="font-bebas text-2xl">Web-Shooter Socket API</h3>
@@ -66,7 +66,7 @@ export default function StatusPage() {
                 <span className="font-fredoka font-bold text-green-600">OPERATIONAL</span>
               </div>
 
-              <div className="flex items-center justify-between p-4 border-2 border-spider-black bg-green-500/10">
+              <div className="flex items-center justify-between p-4 border-2 border-black bg-green-500/10">
                 <div className="flex items-center gap-4">
                   <Check className="text-green-600 w-8 h-8" />
                   <h3 className="font-bebas text-2xl">Symbiote Firewall</h3>
@@ -74,7 +74,7 @@ export default function StatusPage() {
                 <span className="font-fredoka font-bold text-green-600">ACTIVE</span>
               </div>
 
-              <div className="flex items-center justify-between p-4 border-2 border-spider-black bg-green-500/10">
+              <div className="flex items-center justify-between p-4 border-2 border-black bg-green-500/10">
                 <div className="flex items-center gap-4">
                   <Check className="text-green-600 w-8 h-8" />
                   <h3 className="font-bebas text-2xl">Dimensional Rifts (Databases)</h3>

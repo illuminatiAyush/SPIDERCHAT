@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50"
+                className="w-full p-3 font-fredoka border-2 border-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50"
                 required
               />
             </div>
@@ -125,7 +125,7 @@ export default function ForgotPasswordPage() {
                 type="text"
                 value={securityAnswer}
                 onChange={(e) => setSecurityAnswer(e.target.value)}
-                className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50"
+                className="w-full p-3 font-fredoka border-2 border-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50"
                 required
               />
             </div>
@@ -137,7 +137,7 @@ export default function ForgotPasswordPage() {
                   type={showPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50 pr-12"
+                  className="w-full p-3 font-fredoka border-2 border-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-red/50 pr-12"
                   required
                   minLength={6}
                 />

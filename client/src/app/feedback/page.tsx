@@ -51,7 +51,7 @@ export default function FeedbackPage() {
       <div className="absolute top-4 left-4 z-50">
         <Link 
           href="/"
-          className="flex items-center gap-2 font-bebas text-xl text-spider-black bg-spider-white border-2 border-black px-4 py-2 hover:bg-[#39FF14] transition-colors shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+          className="flex items-center gap-2 font-bebas text-xl text-foreground bg-spider-white border-2 border-black px-4 py-2 hover:bg-[#39FF14] transition-colors shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
         >
           <ArrowLeft size={20} /> ESCAPE
         </Link>
@@ -65,7 +65,7 @@ export default function FeedbackPage() {
             textColorClass="text-[#39FF14]"
             className="text-5xl md:text-7xl drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wider"
           />
-          <p className="font-fredoka text-xl text-spider-white mt-4 bg-black/50 px-4 py-2 rounded-xl inline-block border-2 border-white/20">
+          <p className="font-fredoka text-xl text-foreground mt-4 bg-black/50 px-4 py-2 rounded-xl inline-block border-2 border-white/20">
             Got pictures of Spider-Man? Or just some feedback for the app?
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function FeedbackPage() {
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="comic-panel bg-spider-white text-spider-black p-8 relative overflow-hidden"
+          className="comic-panel bg-spider-white text-foreground p-8 relative overflow-hidden"
         >
           {submitted ? (
             <div className="text-center py-12">
@@ -99,7 +99,7 @@ export default function FeedbackPage() {
                   value={formData.alias}
                   onChange={(e) => setFormData({...formData, alias: e.target.value})}
                   placeholder="e.g. Peter Parker"
-                  className="w-full px-4 py-3 font-fredoka border-4 border-spider-black rounded-lg focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  className="w-full px-4 py-3 font-fredoka border-4 border-black rounded-lg focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 />
               </div>
               
@@ -110,7 +110,7 @@ export default function FeedbackPage() {
                   value={formData.universe}
                   onChange={(e) => setFormData({...formData, universe: e.target.value})}
                   placeholder="e.g. Earth-1610"
-                  className="w-full px-4 py-3 font-fredoka border-4 border-spider-black rounded-lg focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  className="w-full px-4 py-3 font-fredoka border-4 border-black rounded-lg focus:outline-none focus:border-spider-blue shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 />
               </div>
 
@@ -122,7 +122,7 @@ export default function FeedbackPage() {
                   value={formData.content}
                   onChange={(e) => setFormData({...formData, content: e.target.value})}
                   placeholder="Tell us what you think..."
-                  className="w-full px-4 py-3 font-fredoka border-4 border-spider-black rounded-lg focus:outline-none focus:border-spider-red shadow-[4px_4px_0_0_rgba(0,0,0,1)] resize-none"
+                  className="w-full px-4 py-3 font-fredoka border-4 border-black rounded-lg focus:outline-none focus:border-spider-red shadow-[4px_4px_0_0_rgba(0,0,0,1)] resize-none"
                 />
               </div>
 
@@ -135,7 +135,7 @@ export default function FeedbackPage() {
               <button 
                 type="submit"
                 disabled={isSubmitting}
-                className="comic-button bg-[#39FF14] text-spider-black w-full py-4 text-2xl hover:bg-spider-black hover:text-[#39FF14] transition-colors disabled:opacity-50"
+                className="comic-button bg-[#39FF14] text-foreground w-full py-4 text-2xl hover:bg-spider-black hover:text-[#39FF14] transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'TRANSMITTING...' : 'SUBMIT TO THE BUGLE'}
               </button>

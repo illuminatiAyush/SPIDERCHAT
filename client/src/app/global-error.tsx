@@ -9,8 +9,8 @@ export default function GlobalError({
 }) {
   return (
     <html>
-      <body className="bg-background text-white min-h-screen flex items-center justify-center font-sans">
-        <div className="max-w-md w-full p-8 bg-surface border border-white/10 rounded-2xl text-center">
+      <body className="bg-spider-black text-white min-h-screen flex items-center justify-center font-sans">
+        <div className="max-w-md w-full p-8 bg-spider-white border border-white/10 rounded-2xl text-center">
           <h2 className="text-2xl font-bold mb-4">A critical error occurred!</h2>
           <p className="text-white/60 mb-8">
             The application crashed unexpectedly. We have been notified.

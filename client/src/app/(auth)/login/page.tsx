@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -37,6 +37,13 @@ export default function LoginPage() {
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-spider-red opacity-10 blur-3xl rounded-full animate-pulse" />
       </div>
 
+      <Link 
+        href="/"
+        className="absolute top-6 left-6 md:top-10 md:left-10 z-20 flex items-center gap-2 font-bebas text-xl md:text-2xl text-spider-white hover:text-spider-red transition-colors drop-shadow-[2px_2px_0_rgba(0,0,0,1)] bg-spider-black/50 p-2 md:px-4 md:py-2 rounded-xl backdrop-blur-sm border-2 border-transparent hover:border-black"
+      >
+        <ArrowLeft size={24} /> <span className="hidden sm:inline">BACK TO MULTIVERSE</span>
+      </Link>
+
       <motion.div
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -59,7 +66,7 @@ export default function LoginPage() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-blue/50"
+              className="w-full p-3 font-fredoka border-2 border-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-blue/50"
               required
             />
           </div>
@@ -71,7 +78,7 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 font-fredoka border-2 border-spider-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-blue/50 pr-12"
+                className="w-full p-3 font-fredoka border-2 border-black bg-white focus:outline-none focus:ring-4 focus:ring-spider-blue/50 pr-12"
                 required
               />
               <button

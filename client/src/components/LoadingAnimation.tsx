@@ -39,7 +39,7 @@ export function LoadingAnimation({ size = 64, className = '', text, inline = fal
     <div className={`flex flex-col items-center justify-center gap-4 w-full ${className}`}>
       {loaderContent}
       {text && (
-        <p className="font-bebas tracking-wider text-spider-white text-xl animate-pulse text-center">
+        <p className="font-bebas tracking-wider text-foreground text-xl animate-pulse text-center">
           {text}
         </p>
       )}

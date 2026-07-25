@@ -117,7 +117,7 @@ const Footer = () => {
         {/* z-50: footer links (Top Navigation) */}
         <div className="relative z-50 flex flex-col md:flex-row justify-between md:justify-around items-center gap-8 mb-16 md:mb-0 w-full mt-4">
           <Link href="/privacy-policy" className="group flex flex-col items-center gap-2">
-            <motion.div whileHover={{ y: -4 }} className="flex items-center gap-2 text-spider-white/60 group-hover:text-spider-red transition-all duration-300">
+            <motion.div whileHover={{ y: -4 }} className="flex items-center gap-2 text-foreground/60 group-hover:text-spider-red transition-all duration-300">
               <span className="font-bebas text-xl md:text-2xl tracking-wider group-hover:underline decoration-2 underline-offset-4 decoration-spider-red group-hover:drop-shadow-[0_0_8px_rgba(226,54,54,0.5)] cursor-pointer">
                 🛡 PRIVACY PROTOCOLS
               </span>
@@ -125,7 +125,7 @@ const Footer = () => {
           </Link>
 
           <Link href="/support" className="group flex flex-col items-center gap-2">
-            <motion.div whileHover={{ y: -4 }} className="flex items-center gap-2 text-spider-white/60 group-hover:text-spider-red transition-all duration-300">
+            <motion.div whileHover={{ y: -4 }} className="flex items-center gap-2 text-foreground/60 group-hover:text-spider-red transition-all duration-300">
               <span className="font-bebas text-xl md:text-2xl tracking-wider group-hover:underline decoration-2 underline-offset-4 decoration-spider-red group-hover:drop-shadow-[0_0_8px_rgba(226,54,54,0.5)] cursor-pointer">
                 🕷 GUY IN THE CHAIR
               </span>
@@ -133,7 +133,7 @@ const Footer = () => {
           </Link>
 
           <Link href="/feedback" className="group flex flex-col items-center gap-2">
-            <motion.div whileHover={{ y: -4 }} className="flex items-center gap-2 text-spider-white/60 group-hover:text-spider-red transition-all duration-300">
+            <motion.div whileHover={{ y: -4 }} className="flex items-center gap-2 text-foreground/60 group-hover:text-spider-red transition-all duration-300">
               <span className="font-bebas text-xl md:text-2xl tracking-wider group-hover:underline decoration-2 underline-offset-4 decoration-spider-red group-hover:drop-shadow-[0_0_8px_rgba(226,54,54,0.5)] cursor-pointer">
                 📰 DAILY BUGLE
               </span>
@@ -233,7 +233,7 @@ const Footer = () => {
             transition={{ duration: 1, delay: 0.2 }}
             className="mt-2 text-center"
           >
-            <p className="font-fredoka text-lg md:text-2xl text-spider-white/60 italic drop-shadow-lg tracking-wide">
+            <p className="font-fredoka text-lg md:text-2xl text-foreground/60 italic drop-shadow-lg tracking-wide">
               "One Web. Infinite Conversations."
             </p>
           </motion.div>
@@ -243,15 +243,15 @@ const Footer = () => {
         <div className="relative z-50 w-full mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-4">
 
           <div className="flex flex-col items-center md:items-start gap-1 text-center md:text-left">
-            <p className="font-fredoka text-xs md:text-sm text-spider-white/40 tracking-wider">
+            <p className="font-fredoka text-xs md:text-sm text-foreground/40 tracking-wider">
               © 2026 SpiderChat • Earth-616
             </p>
-            <p className="font-fredoka text-[10px] md:text-xs text-spider-white/30 italic">
+            <p className="font-fredoka text-[10px] md:text-xs text-foreground/30 italic">
               "With Great Conversations Comes Great Responsibility."
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-6 font-bebas text-lg text-spider-white/40">
+          <div className="flex flex-wrap justify-center gap-6 font-bebas text-lg text-foreground/40">
             <Link href="/terms" className="hover:text-spider-red hover:underline hover:-translate-y-1 decoration-2 underline-offset-4 decoration-spider-red transition-all duration-300 flex items-center gap-1 cursor-pointer group">
               <FileText size={14} className="group-hover:text-spider-red transition-colors" />
               Terms of Service

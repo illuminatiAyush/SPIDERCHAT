@@ -28,7 +28,7 @@ export function AnnouncementBanner() {
         animate={{ height: "auto", opacity: 1 }}
         exit={{ height: 0, opacity: 0 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="relative z-50 w-full overflow-hidden bg-spider-black border-b border-spider-blue/30 shadow-[0_0_10px_rgba(80,97,226,0.2)] text-spider-white text-xs md:text-sm font-fredoka flex items-center"
+        className="relative z-50 w-full overflow-hidden bg-spider-black border-b border-spider-blue/30 shadow-[0_0_10px_rgba(80,97,226,0.2)] text-foreground text-xs md:text-sm font-fredoka flex items-center"
       >
         <div className="flex-1 overflow-hidden flex items-center h-7 md:h-8">
           <div className="animate-marquee flex whitespace-nowrap min-w-max cursor-default">

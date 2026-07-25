@@ -11,9 +11,11 @@ import { useAuth } from "@/components/AuthProvider";
 interface RoomHeaderProps {
   roomCode: string;
   userCount: number;
+  isOwner?: boolean;
+  onOpenAdmin?: () => void;
 }
 
-export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
+export default function RoomHeader({ roomCode, userCount, isOwner, onOpenAdmin }: RoomHeaderProps) {
   const [isCopied, setIsCopied] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
@@ -52,7 +54,7 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
           className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity focus:outline-none"
           aria-label="SpiderChat home"
         >
-          <span className="relative h-10 w-10 md:h-12 md:w-12 flex-shrink-0 rounded-full overflow-hidden border-2 border-spider-black shadow-[2px_2px_0_rgba(0,0,0,1)]">
+          <span className="relative h-10 w-10 md:h-12 md:w-12 flex-shrink-0 rounded-full overflow-hidden border-2 border-black shadow-[2px_2px_0_rgba(0,0,0,1)]">
             <Image
               src="/spider.png"
               alt="SpiderChat"
@@ -83,6 +85,16 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
         </div>
 
         <div className="flex gap-2">
+          {isOwner && (
+            <button
+              onClick={onOpenAdmin}
+              className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500 text-black border-2 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-spider-black hover:text-yellow-500 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
+            >
+              <span className="font-bebas text-xs md:text-sm uppercase tracking-widest">
+                ADMIN
+              </span>
+            </button>
+          )}
           <button
             onClick={copyRoomLink}
             className={`flex items-center gap-2 px-3 py-1.5 border-2 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all ${isCopied ? "bg-green-500 text-white" : "bg-spider-blue text-white hover:bg-spider-black"
