@@ -216,55 +216,65 @@ module.exports = (io) => {
     socket.on('join_dm', () => {});
     socket.on('leave_dm', () => {});
 
-    socket.on('dm_send', ({ conversationId, content, type, replyTo, messageId }) => {
+    socket.on('dm_send', async ({ conversationId, content, type, replyTo, messageId }) => {
       if (checkRateLimit(userId)) {
         return socket.emit('error_message', 'Rate limit exceeded. Slow down!');
       }
 
-      const receiverId = conversationId; // In our schema, conversationId passed from client is the friend's ID
+      try {
+        const conversation = await prisma.conversation.findUnique({
+          where: { id: conversationId },
+          include: { participants: true }
+        });
+        
+        if (!conversation) return;
+        
+        const receiver = conversation.participants.find(p => p.id !== userId);
+        const receiverId = receiver ? receiver.id : userId; // fallback to self if self-DM
 
-      const message = {
-        _id: messageId || `rt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        senderId: {
-          _id: userId,
-          username: username,
-          displayName: username,
-          avatar: null
-        },
-        content,
-        type: type || 'text',
-        status: 'sent',
-        replyTo: replyTo || null,
-        reactions: [],
-        createdAt: new Date().toISOString(),
-        conversationId: userId // For the receiver, the conversation is with the sender
-      };
+        const message = {
+          _id: messageId || `rt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          senderId: {
+            _id: userId,
+            username: username,
+            displayName: username,
+            avatar: null
+          },
+          content,
+          type: type || 'text',
+          status: 'sent',
+          replyTo: replyTo || null,
+          reactions: [],
+          createdAt: new Date().toISOString(),
+          conversationId: conversationId
+        };
 
-      // Broadcast to receiver
-      const receiverSockets = userSockets.get(receiverId);
-      if (receiverSockets) {
-        for (const socketId of receiverSockets) {
-          io.to(socketId).emit('dm_receive', message);
-        }
-      }
-
-      // Broadcast to sender's other tabs
-      const mySockets = userSockets.get(userId);
-      if (mySockets) {
-        for (const socketId of mySockets) {
-          if (socketId !== socket.id) {
-            io.to(socketId).emit('dm_receive', { ...message, conversationId: receiverId });
+        // Broadcast to receiver
+        if (receiverId !== userId) {
+          const receiverSockets = userSockets.get(receiverId);
+          if (receiverSockets) {
+            for (const socketId of receiverSockets) {
+              io.to(socketId).emit('dm_receive', message);
+            }
           }
         }
-      }
 
-      // Create Moderation Log (fire-and-forget)
-      try {
+        // Broadcast to sender's other tabs
+        const mySockets = userSockets.get(userId);
+        if (mySockets) {
+          for (const socketId of mySockets) {
+            if (socketId !== socket.id) {
+              io.to(socketId).emit('dm_receive', message);
+            }
+          }
+        }
+
+        // Create Moderation Log (fire-and-forget)
         prisma.moderationLog.create({
           data: {
             messageId: message._id,
             source: 'DM',
-            conversationId: receiverId, // this acts as the "room" for a DM
+            conversationId: conversationId, 
             senderId: userId,
             senderName: username,
             recipientId: receiverId,
@@ -277,49 +287,82 @@ module.exports = (io) => {
           io.to('admin_dashboard').emit('moderation:new', modLog);
         }).catch(err => console.error('[Socket] Failed to persist DM mod log:', err));
       } catch (err) {
-        console.error('[Socket] Error triggering DM moderation persistence:', err);
+        console.error('[Socket] Error in dm_send:', err);
       }
     });
 
-    socket.on('dm_typing', ({ conversationId, isTyping }) => {
-      const receiverId = conversationId;
-      const receiverSockets = userSockets.get(receiverId);
-      if (receiverSockets) {
-        for (const socketId of receiverSockets) {
-          io.to(socketId).emit('dm_typing', {
-            userId,
-            isTyping,
-            conversationId: userId
-          });
+    socket.on('dm_typing', async ({ conversationId, isTyping }) => {
+      try {
+        const conversation = await prisma.conversation.findUnique({
+          where: { id: conversationId },
+          include: { participants: true }
+        });
+        if (!conversation) return;
+        const receiver = conversation.participants.find(p => p.id !== userId);
+        if (!receiver) return;
+        
+        const receiverSockets = userSockets.get(receiver.id);
+        if (receiverSockets) {
+          for (const socketId of receiverSockets) {
+            io.to(socketId).emit('dm_typing', {
+              userId,
+              isTyping,
+              conversationId
+            });
+          }
         }
+      } catch (err) {
+        console.error('[Socket] Error in dm_typing:', err);
       }
     });
 
-    socket.on('dm_seen', ({ conversationId }) => {
-      const receiverId = conversationId;
-      const receiverSockets = userSockets.get(receiverId);
-      if (receiverSockets) {
-        for (const socketId of receiverSockets) {
-          io.to(socketId).emit('dm_seen', {
-            conversationId: userId,
-            userId
-          });
+    socket.on('dm_seen', async ({ conversationId }) => {
+      try {
+        const conversation = await prisma.conversation.findUnique({
+          where: { id: conversationId },
+          include: { participants: true }
+        });
+        if (!conversation) return;
+        const receiver = conversation.participants.find(p => p.id !== userId);
+        if (!receiver) return;
+
+        const receiverSockets = userSockets.get(receiver.id);
+        if (receiverSockets) {
+          for (const socketId of receiverSockets) {
+            io.to(socketId).emit('dm_seen', {
+              conversationId,
+              userId
+            });
+          }
         }
+      } catch (err) {
+        console.error('[Socket] Error in dm_seen:', err);
       }
     });
 
-    socket.on('dm_reaction', ({ conversationId, messageId, emoji }) => {
-      const receiverId = conversationId;
-      const receiverSockets = userSockets.get(receiverId);
-      if (receiverSockets) {
-        for (const socketId of receiverSockets) {
-          io.to(socketId).emit('dm_reaction', {
-            messageId,
-            emoji,
-            userId,
-            conversationId: userId
-          });
+    socket.on('dm_reaction', async ({ conversationId, messageId, emoji }) => {
+      try {
+        const conversation = await prisma.conversation.findUnique({
+          where: { id: conversationId },
+          include: { participants: true }
+        });
+        if (!conversation) return;
+        const receiver = conversation.participants.find(p => p.id !== userId);
+        if (!receiver) return;
+
+        const receiverSockets = userSockets.get(receiver.id);
+        if (receiverSockets) {
+          for (const socketId of receiverSockets) {
+            io.to(socketId).emit('dm_reaction', {
+              messageId,
+              emoji,
+              userId,
+              conversationId
+            });
+          }
         }
+      } catch (err) {
+        console.error('[Socket] Error in dm_reaction:', err);
       }
     });
 

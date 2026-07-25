@@ -77,8 +77,21 @@ export default function DashboardHome() {
 
   const startDM = async (userId: string) => {
     if (!user) return;
-    const roomId = [user.id, userId].sort().join("_");
-    router.push(`/room/${roomId}`);
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ partnerId: userId })
+      });
+      const data = await res.json();
+      if (res.ok && data.conversationId) {
+        router.push(`/dashboard/messages/${data.conversationId}`);
+      } else {
+        console.error("Failed to start DM:", data.error);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const statCards = [

@@ -14,14 +14,37 @@ export async function POST(req: Request) {
 
     const userId = decoded.id;
     const body = await req.json();
-    const { conversationId } = body; // This is the friend's ID
+    const { conversationId } = body; 
 
     if (!conversationId) return NextResponse.json({ error: "conversationId is required" }, { status: 400 });
 
-    const roomId = [userId, conversationId].sort().join("_");
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId }
+    });
 
-    // Mocking the successful read since we reverted the DB schema for now
-    return NextResponse.json({ success: true, count: 1 });
+    if (conversation) {
+      let unreadCounts = (conversation.unreadCounts as Record<string, number>) || {};
+      if (unreadCounts[userId] !== 0) {
+        unreadCounts[userId] = 0;
+        await prisma.conversation.update({
+          where: { id: conversationId },
+          data: { unreadCounts }
+        });
+      }
+    }
+
+    const { count } = await prisma.directMessage.updateMany({
+      where: {
+        conversationId,
+        senderId: { not: userId },
+        status: { not: 'seen' }
+      },
+      data: {
+        status: 'seen'
+      }
+    });
+
+    return NextResponse.json({ success: true, count });
   } catch (error) {
     console.error("Mark read error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

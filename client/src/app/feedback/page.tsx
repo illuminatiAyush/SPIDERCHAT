@@ -10,22 +10,37 @@ export default function FeedbackPage() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({ alias: '', universe: '', content: '' });
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const alias = formData.alias.trim();
+    const content = formData.content.trim();
+    
+    if (!alias || !content) {
+      setErrorMsg("Alias and content cannot be empty.");
+      return;
+    }
+    
     setIsSubmitting(true);
+    setErrorMsg(null);
     try {
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
+      const data = await res.json();
       if (res.ok) {
         setSubmitted(true);
         setFormData({ alias: '', universe: '', content: '' });
+      } else {
+        setErrorMsg(data.error || "Failed to submit feedback.");
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
+      setErrorMsg("Network error. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
@@ -110,6 +125,12 @@ export default function FeedbackPage() {
                   className="w-full px-4 py-3 font-fredoka border-4 border-spider-black rounded-lg focus:outline-none focus:border-spider-red shadow-[4px_4px_0_0_rgba(0,0,0,1)] resize-none"
                 />
               </div>
+
+              {errorMsg && (
+                <div className="p-3 bg-red-100 border-2 border-red-500 text-red-700 font-fredoka text-sm">
+                  {errorMsg}
+                </div>
+              )}
 
               <button 
                 type="submit"

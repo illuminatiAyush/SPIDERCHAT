@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { socket } from "@/lib/socket";
+import { useAuth } from "@/components/AuthProvider";
 
 interface RoomHeaderProps {
   roomCode: string;
@@ -15,6 +16,7 @@ interface RoomHeaderProps {
 export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
   const [isCopied, setIsCopied] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
   const copyRoomLink = () => {
     const link = `${window.location.origin}/join?code=${roomCode}`;
@@ -26,7 +28,19 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
   const handleLogout = () => {
     socket.disconnect();
     sessionStorage.removeItem("spiderchat_username");
-    router.push("/");
+    if (user) {
+      router.push("/dashboard");
+    } else {
+      router.push("/");
+    }
+  };
+
+  const handleHomeClick = () => {
+    if (user) {
+      router.push("/dashboard");
+    } else {
+      router.push("/");
+    }
   };
 
   return (
@@ -34,7 +48,7 @@ export default function RoomHeader({ roomCode, userCount }: RoomHeaderProps) {
       <div className="flex items-center gap-3 w-full md:w-auto">
         <button
           type="button"
-          onClick={() => router.push("/")}
+          onClick={handleHomeClick}
           className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity focus:outline-none"
           aria-label="SpiderChat home"
         >

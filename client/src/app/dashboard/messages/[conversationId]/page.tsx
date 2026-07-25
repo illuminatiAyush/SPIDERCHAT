@@ -88,7 +88,7 @@ export default function ConversationPage() {
         );
         const msgData = await msgRes.json();
         setMessages(msgData.messages || []);
-        setHasMore(false); // Simplified for Prisma demo
+        setHasMore(msgData.hasMore || false);
 
         // Mark as read
         await fetch("/api/messages/read", {
@@ -218,12 +218,14 @@ export default function ConversationPage() {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     try {
+      const firstMsg = messages[0];
+      const cursor = firstMsg ? firstMsg._id : null;
       const res = await fetch(
-        `/api/messages/${conversationId}`
+        `/api/messages/${conversationId}${cursor ? '?cursor=' + cursor : ''}`
       );
       const data = await res.json();
-      setHasMore(false);
-      setMessages(data.messages || []);
+      setHasMore(data.hasMore || false);
+      setMessages(prev => [...(data.messages || []), ...prev]);
     } catch (err) {
       console.error(err);
     } finally {
