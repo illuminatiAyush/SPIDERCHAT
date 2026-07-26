@@ -51,7 +51,7 @@ export default function FeedbackPage() {
       <div className="absolute top-4 left-4 z-50">
         <Link 
           href="/"
-          className="flex items-center gap-2 font-bebas text-xl text-foreground bg-spider-white border-2 border-black px-4 py-2 hover:bg-[#39FF14] transition-colors shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+          className="flex items-center gap-2 font-bebas text-xl text-black bg-spider-white border-2 border-black px-4 py-2 hover:bg-[#39FF14] transition-colors shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
         >
           <ArrowLeft size={20} /> ESCAPE
         </Link>
