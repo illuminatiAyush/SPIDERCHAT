@@ -96,19 +96,33 @@ export function GlitchText({
 
   return (
     <div className={clsx("spiderverse-logo-wrapper relative inline-block", className)}>
+      {/* Invisible placeholder to maintain exact layout dimensions based on default text */}
       <div
         className={clsx(
-          "spiderverse-logo-base",
-          activeColor,
-          styleState,
-          isGlitching && "is-glitching"
+          "spiderverse-logo-base invisible",
+          textColorClass,
+          STYLE_VARIANTS[0]
         )}
-        data-text={text}
       >
-        <span className="logo-layer logo-layer-red" aria-hidden="true">{text}</span>
-        <span className="logo-layer logo-layer-cyan" aria-hidden="true">{text}</span>
-        <span className="logo-layer logo-layer-blue" aria-hidden="true">{text}</span>
-        <span className="logo-layer logo-layer-base">{renderFormattedText(text)}</span>
+        <span className="logo-layer logo-layer-base">{renderFormattedText(defaultText)}</span>
+      </div>
+
+      {/* Absolute container to center the glitch text without affecting its internal animation */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div
+          className={clsx(
+            "spiderverse-logo-base whitespace-nowrap",
+            activeColor,
+            styleState,
+            isGlitching && "is-glitching"
+          )}
+          data-text={text}
+        >
+          <span className="logo-layer logo-layer-red" aria-hidden="true">{text}</span>
+          <span className="logo-layer logo-layer-cyan" aria-hidden="true">{text}</span>
+          <span className="logo-layer logo-layer-blue" aria-hidden="true">{text}</span>
+          <span className="logo-layer logo-layer-base">{renderFormattedText(text)}</span>
+        </div>
       </div>
     </div>
   );
