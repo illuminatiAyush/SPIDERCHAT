@@ -1,24 +1,39 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, LogOut, Check } from "lucide-react";
+import { Copy, LogOut, Check, Moon, Sun } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { socket } from "@/lib/socket";
 import { useAuth } from "@/components/AuthProvider";
+import ParticipantsPanel, { Participant } from "./ParticipantsPanel";
+import { cn } from "@/lib/utils";
 
 interface RoomHeaderProps {
   roomCode: string;
   userCount: number;
   isOwner?: boolean;
   onOpenAdmin?: () => void;
+  participants: Participant[];
+  currentUsername: string;
+  isDarkMode?: boolean;
+  onToggleDarkMode?: () => void;
 }
 
-export default function RoomHeader({ roomCode, userCount, isOwner, onOpenAdmin }: RoomHeaderProps) {
+export default function RoomHeader({ roomCode, userCount, isOwner, onOpenAdmin, participants, currentUsername, isDarkMode, onToggleDarkMode }: RoomHeaderProps) {
   const [isCopied, setIsCopied] = useState(false);
+  const [showParticipants, setShowParticipants] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const copyRoomLink = () => {
     const link = `${window.location.origin}/join?code=${roomCode}`;
@@ -74,24 +89,56 @@ export default function RoomHeader({ roomCode, userCount, isOwner, onOpenAdmin }
       </div>
 
       <div className="flex items-center justify-between md:justify-end gap-3 md:gap-6 w-full md:w-auto">
-        <div className="flex items-center gap-2 font-fredoka font-bold text-[10px] md:text-sm">
+        <div
+          className="relative flex items-center gap-2 font-fredoka font-bold text-[10px] md:text-sm cursor-pointer hover:opacity-80 transition-opacity"
+          onMouseEnter={() => !isMobile && setShowParticipants(true)}
+          onMouseLeave={() => !isMobile && setShowParticipants(false)}
+          onClick={() => isMobile && setShowParticipants(!showParticipants)}
+        >
           <span className="relative flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-spider-blue opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-spider-blue"></span>
           </span>
-          <span className="text-spider-black uppercase tracking-tighter">
+          <span className={cn("uppercase tracking-tighter", isDarkMode ? "text-spider-white" : "text-spider-black")}>
             <span className="text-spider-red text-lg md:text-xl font-bebas">{userCount}</span> <span className="font-bebas">HEROES ACTIVE</span>
           </span>
+
+          <ParticipantsPanel
+            participants={participants}
+            currentUsername={currentUsername}
+            isOpen={showParticipants}
+            onClose={() => setShowParticipants(false)}
+            isMobile={isMobile}
+            isDarkMode={isDarkMode}
+          />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 md:gap-4 ml-auto">
+          {/* Dark Mode Toggle */}
+          {onToggleDarkMode && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onToggleDarkMode}
+              className={cn(
+                "p-2 md:p-3 border-2 border-black transition-colors flex items-center justify-center",
+                isDarkMode 
+                  ? "bg-[#141414] text-spider-white shadow-[2px_2px_0_0_rgba(255,255,255,1)] border-spider-white" 
+                  : "bg-spider-white text-spider-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-gray-100"
+              )}
+              title="Toggle Dark Mode"
+            >
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </motion.button>
+          )}
+
           {isOwner && (
             <button
               onClick={onOpenAdmin}
               className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500 text-black border-2 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-spider-black hover:text-yellow-500 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
             >
               <span className="font-bebas text-xs md:text-sm uppercase tracking-widest">
-                ADMIN
+                ADMIN CONTROLS
               </span>
             </button>
           )}

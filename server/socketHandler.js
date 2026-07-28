@@ -1,5 +1,6 @@
 const roomManager = require('./roomManager');
 const { updateUserPresence } = require('./db');
+const crypto = require('crypto');
 
 // Track userId -> Set of socketIds for DM routing
 const userSockets = new Map();
@@ -25,6 +26,16 @@ const checkRateLimit = (userId) => {
   data.count += 1;
   return data.count > MAX_EVENTS_PER_MIN;
 };
+
+// Periodic garbage collection for rate limits
+setInterval(() => {
+  const now = Date.now();
+  for (const [userId, data] of socketRateLimit.entries()) {
+    if (now - data.lastReset > 60000) {
+      socketRateLimit.delete(userId);
+    }
+  }
+}, 60000);
 
 const cookie = require('cookie');
 const jwt = require('jsonwebtoken');
@@ -57,7 +68,8 @@ module.exports = (io) => {
     } catch (err) {
       // Invalid token, fallback to anonymous
       const providedUsername = socket.handshake.auth?.username || 'Anonymous';
-      socket.user = { id: `anon_${Math.random().toString(36).substring(7)}`, username: providedUsername };
+      const providedGuestId = socket.handshake.auth?.guestId;
+      socket.user = { id: providedGuestId || `anon_${Math.random().toString(36).substring(7)}`, username: providedUsername };
       next();
     }
   });
@@ -88,7 +100,8 @@ module.exports = (io) => {
 
     socket.on('join_room', ({ roomCode, username }) => {
       console.log(`[Socket] Join attempt: ${username} -> Room ${roomCode}`);
-      const result = roomManager.joinRoom(roomCode, socket.id, username);
+      // Pass userId to RoomManager for deduplication and auth tracking
+      const result = roomManager.joinRoom(roomCode, socket.id, username, userId);
 
       if (result.error) {
         console.warn(`[Socket] Join REJECTED for ${username}: ${result.error}`);
@@ -101,13 +114,31 @@ module.exports = (io) => {
       const users = roomManager.getUsersInRoom(roomCode);
       const room = roomManager.getRoom(roomCode);
       
-      // Update everyone in the room with the new user list
+      // Send the full list to the joining user
+      socket.emit('room_participants', users);
+      
+      // Broadcast granular event to others
+      const joinedUser = users.find(u => u.username === username);
+      if (joinedUser) {
+        // We use participant_updated if they already existed (reconnecting/multi-tab), but participant_joined works if client merges by ID.
+        // Let's just broadcast participant_updated to be safe, the client will upsert.
+        socket.to(roomCode).emit('participant_updated', joinedUser);
+      }
+      
+      // Legacy support for existing components
       io.to(roomCode).emit('user_list', users);
       
       // Send message history to the joining user
       if (room && room.messages) {
-        console.log(`[Socket] Sending ${room.messages.length} messages to ${username}`);
-        socket.emit('message_history', room.messages);
+        // Find the user's earliest join time to restrict history
+        let joinTime = Date.now();
+        const userData = room.users.get(socket.id);
+        if (userData && userData.joinedAt) joinTime = userData.joinedAt;
+        
+        // Filter messages so new users don't see history prior to joining
+        const filteredMessages = room.messages.filter(m => m.serverTime >= joinTime);
+        console.log(`[Socket] Sending ${filteredMessages.length} messages (out of ${room.messages.length}) to ${username}`);
+        socket.emit('message_history', filteredMessages);
       }
       
       // Broadcast join message
@@ -137,7 +168,11 @@ module.exports = (io) => {
       }
     });
 
-    socket.on('send_message', ({ roomCode, text, replyTo }) => {
+    socket.on('send_message', async ({ roomCode, text, replyTo }) => {
+      if (!text || typeof text !== 'string' || text.trim().length === 0 || text.length > 5000) {
+        return socket.emit('error_message', 'Invalid message content.');
+      }
+      
       if (checkRateLimit(userId)) {
         return socket.emit('error_message', 'Rate limit exceeded. Slow down!');
       }
@@ -163,25 +198,50 @@ module.exports = (io) => {
          timers.set(socket.id, now);
       }
 
+      const messageId = crypto.randomUUID();
+
       const message = {
+        id: messageId,
         username,
+        senderId: userId, // Stable identifier for ownership
         text,
         timestamp: new Date().toLocaleTimeString(),
         serverTime: Date.now(),
         type: 'user'
       };
 
-      // Attach reply reference if replying to a message
-      if (replyTo) {
-        message.replyTo = {
-          username: replyTo.username,
-          text: replyTo.text
-        };
+      // Validate and attach reply reference
+      if (replyTo && replyTo.id) {
+        // Check in memory first
+        let originalMsg = room.messages.find(m => m.id === replyTo.id);
+        
+        // If not in memory, check database
+        if (!originalMsg) {
+          try {
+            const dbMsg = await prisma.message.findUnique({
+              where: { id: replyTo.id }
+            });
+            if (dbMsg && dbMsg.roomId === roomCode && !dbMsg.deleted) {
+              originalMsg = { id: dbMsg.id, username: dbMsg.senderName, text: dbMsg.content };
+            }
+          } catch (err) {
+            console.error('[Socket] Failed to validate reply against DB:', err);
+          }
+        }
+
+        if (originalMsg) {
+          message.replyTo = {
+            id: replyTo.id,
+            username: originalMsg.username || replyTo.senderName || 'Unknown',
+            text: originalMsg.text || replyTo.preview || ''
+          };
+          message.replyToId = replyTo.id; // used for DB
+        }
       }
       
       room.messages.push(message);
-      // Limit message history to 50 for performance
-      if (room.messages.length > 50) room.messages.shift();
+      // Limit message history to 500 to prevent message loss on refresh
+      if (room.messages.length > 500) room.messages.shift();
       
       io.to(roomCode).emit('receive_message', message);
       roomManager.saveToPersistence(); // Save history
@@ -193,11 +253,13 @@ module.exports = (io) => {
         
         prisma.message.create({
           data: {
+            id: messageId,
             content: text,
             senderId: dbSenderId,
             senderName: username || 'Anonymous',
             roomId: roomCode,
-            type: 'user'
+            type: 'user',
+            replyToId: message.replyToId || null
           }
         }).then((persistedMessage) => {
           // Determine if it's a DM (roomCode contains '_')
@@ -374,6 +436,7 @@ module.exports = (io) => {
            }
        });
        roomManager.rooms.delete(roomCode);
+       roomSlowModeTimers.delete(roomCode); // Clean up slow mode map
        roomManager.saveToPersistence();
     });
 
@@ -601,18 +664,43 @@ module.exports = (io) => {
       // Room chat cleanup
       const leaveData = roomManager.leaveRoom(socket.id);
       if (leaveData) {
-        const { roomCode, username, roomDeleted } = leaveData;
+        const { roomCode, username, roomDeleted, isLastSocket } = leaveData;
         if (!roomDeleted) {
+          // Immediately emit that the user is now 'reconnecting' or still 'connected' (if other tabs)
           const remainingUsers = roomManager.getUsersInRoom(roomCode);
+          const updatedUser = remainingUsers.find(u => u.username === username);
+          if (updatedUser) {
+            io.to(roomCode).emit('participant_updated', updatedUser);
+          }
+          // Legacy support
           io.to(roomCode).emit('user_list', remainingUsers);
-          io.to(roomCode).emit('receive_message', {
-            username: 'SYSTEM',
-            text: `${username} has left the multiverse.`,
-            timestamp: new Date().toLocaleTimeString(),
-            type: 'system'
-          });
+
+          // If it was their last socket, wait 5 seconds before fully removing them
+          if (isLastSocket) {
+            setTimeout(() => {
+              const removeResult = roomManager.forceRemoveUser(roomCode, username);
+              
+              if (removeResult && removeResult.success !== false) {
+                // They didn't reconnect, they are truly gone
+                if (!removeResult.roomDeleted) {
+                  const finalUsers = roomManager.getUsersInRoom(roomCode);
+                  io.to(roomCode).emit('participant_left', { username });
+                  
+                  // Legacy support
+                  io.to(roomCode).emit('user_list', finalUsers);
+                  
+                  io.to(roomCode).emit('receive_message', {
+                    username: 'SYSTEM',
+                    text: `${username} has left the multiverse.`,
+                    timestamp: new Date().toLocaleTimeString(),
+                    type: 'system'
+                  });
+                }
+                console.log(`[Socket] ${username} completely left room ${roomCode}`);
+              }
+            }, 5000);
+          }
         }
-        console.log(`[Socket] ${username} left room ${roomCode}`);
       }
 
       // DM user tracking cleanup (only for authenticated users)

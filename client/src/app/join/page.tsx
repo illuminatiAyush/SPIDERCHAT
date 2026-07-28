@@ -33,8 +33,16 @@ function JoinForm() {
       return;
     }
 
-    if (!socket.connected) {
-      socket.auth = { username: trimmedUsername, userId: user?.id };
+    if (!socket.connected || (socket.auth as any)?.username !== trimmedUsername) {
+      if (socket.connected) socket.disconnect();
+      
+      let guestId = sessionStorage.getItem("spiderchat_guest_id");
+      if (!guestId) {
+        guestId = `anon_${Math.random().toString(36).substring(2, 11)}`;
+        sessionStorage.setItem("spiderchat_guest_id", guestId);
+      }
+      
+      socket.auth = { username: trimmedUsername, userId: user?.id, guestId };
       socket.connect();
     }
 

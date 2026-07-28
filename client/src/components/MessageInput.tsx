@@ -5,33 +5,65 @@ import { socket } from "@/lib/socket";
 import { Send, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Message } from "@/app/room/[roomCode]/page";
+import { cn } from "@/lib/utils";
 
 interface MessageInputProps {
   roomCode: string;
   username: string;
   replyingTo: Message | null;
   onCancelReply: () => void;
+  isDarkMode?: boolean;
 }
 
-export default function MessageInput({ roomCode, username, replyingTo, onCancelReply }: MessageInputProps) {
+export default function MessageInput({ roomCode, username, replyingTo, onCancelReply, isDarkMode }: MessageInputProps) {
   const [text, setText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const autoResize = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'; // Reset to auto to calculate scrollHeight
+      const scrollHeight = textareaRef.current.scrollHeight;
+      // Min height is around 48px, Max height 180px
+      textareaRef.current.style.height = `${Math.max(48, Math.min(scrollHeight, 180))}px`;
+    }
+  };
+
+  useEffect(() => {
+    autoResize();
+  }, [text]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const isMobile = window.innerWidth <= 768;
+    if (e.key === 'Enter') {
+      if (isMobile) {
+        // Mobile: Enter creates new line, do nothing to prevent default
+        return;
+      }
+      
+      // Desktop: Enter sends, Shift+Enter creates new line
+      if (!e.shiftKey) {
+        e.preventDefault();
+        handleSend(e as unknown as React.FormEvent);
+      }
+    }
+  };
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
 
-    const payload: { roomCode: string; text: string; username: string; replyTo?: { username: string; text: string } } = {
+    const payload: { roomCode: string; text: string; username: string; replyTo?: { id: string; senderName: string; preview: string } } = {
       roomCode,
       text,
       username,
     };
 
-    if (replyingTo) {
+    if (replyingTo && replyingTo.id) {
       payload.replyTo = {
-        username: replyingTo.username,
-        text: replyingTo.text,
+        id: replyingTo.id,
+        senderName: replyingTo.username,
+        preview: replyingTo.text.length > 60 ? replyingTo.text.substring(0, 60) + "..." : replyingTo.text,
       };
       onCancelReply();
     }
@@ -45,7 +77,7 @@ export default function MessageInput({ roomCode, username, replyingTo, onCancelR
 
     // Re-focus input after send to prevent mobile keyboard dismissal
     requestAnimationFrame(() => {
-      inputRef.current?.focus();
+      textareaRef.current?.focus();
     });
   };
 
@@ -72,7 +104,7 @@ export default function MessageInput({ roomCode, username, replyingTo, onCancelR
   // Auto-focus input when replying to a message
   useEffect(() => {
     if (replyingTo) {
-      inputRef.current?.focus();
+      textareaRef.current?.focus();
     }
   }, [replyingTo]);
 
@@ -107,15 +139,18 @@ export default function MessageInput({ roomCode, username, replyingTo, onCancelR
       </AnimatePresence>
 
       <form onSubmit={handleSend} className="flex gap-2">
-        <input
-          ref={inputRef}
-          type="text"
+        <textarea
+          ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder={replyingTo ? `Reply to ${replyingTo.username}...` : "Message..."}
-          className="flex-1 px-4 py-3 md:py-2 border-4 border-black font-fredoka focus:outline-none focus:ring-0 bg-white text-spider-black text-base md:text-sm"
-          enterKeyHint="send"
+          className={cn(
+            "flex-1 px-4 py-3 md:py-2 border-4 font-fredoka focus:outline-none focus:ring-0 text-base md:text-sm resize-none overflow-y-auto min-h-[48px] max-h-[180px]",
+            isDarkMode ? "bg-[#141414] text-spider-white border-[#141414]" : "bg-white text-spider-black border-black"
+          )}
           autoComplete="off"
+          rows={1}
         />
         <motion.button
           whileHover={{ scale: 1.05 }}

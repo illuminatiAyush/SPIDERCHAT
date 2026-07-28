@@ -49,14 +49,14 @@ const Footer = () => {
       {/* z-0: Spider-Verse wallpaper */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <Image
-          src="/footerimg.jpg"
+          src="/footer.gif"
           alt="Spider-Verse Cinematic Background"
           fill
           priority={false}
           className="object-cover scale-105"
           style={{
-            opacity: 0.40,
-            filter: 'brightness(0.60) contrast(1.1) saturate(1.1)'
+            opacity: 0.75,
+            filter: 'brightness(0.90) contrast(1.1) saturate(1.1)'
           }}
         />
       </div>

@@ -13,6 +13,13 @@ import { GlitchText } from "@/components/GlitchText";
 import { LoadingAnimation } from "@/components/LoadingAnimation";
 import { AnimatedTagline } from "@/components/AnimatedTagline";
 import Footer from "@/components/Footer";
+import ExploreMultiverse from "@/components/landing/ExploreMultiverse";
+import LiveActivityFeed from "@/components/landing/LiveActivityFeed";
+import FeaturesComicGrid from "@/components/landing/FeaturesComicGrid";
+import MomentsAlive from "@/components/landing/MomentsAlive";
+import SpiderChatNumbers from "@/components/landing/SpiderChatNumbers";
+import CommunityTestimonials from "@/components/landing/CommunityTestimonials";
+import FinalCTA from "@/components/landing/FinalCTA";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -25,7 +32,14 @@ export default function LandingPage() {
     setIsCreating(true);
     // Connect as anonymous or authenticated
     const providedUsername = user?.username || "Host_" + Math.floor(Math.random() * 1000);
-    socket.auth = { username: providedUsername, userId: user?.id };
+    
+    let guestId = sessionStorage.getItem("spiderchat_guest_id");
+    if (!guestId) {
+      guestId = `anon_${Math.random().toString(36).substring(2, 11)}`;
+      sessionStorage.setItem("spiderchat_guest_id", guestId);
+    }
+    
+    socket.auth = { username: providedUsername, userId: user?.id, guestId };
 
     if (socket.connected) {
       socket.emit("create_room");
@@ -150,13 +164,13 @@ export default function LandingPage() {
             transition={{ duration: 0.8, type: "spring" }}
             className="flex flex-col items-center"
           >
-            <span className="relative h-24 w-24 md:h-32 md:w-32 flex-shrink-0 rounded-full overflow-hidden border-4 border-black shadow-[4px_4px_0_rgba(0,0,0,1)] mb-4">
+            <span className="relative h-24 w-24 md:h-32 md:w-32 flex-shrink-0 mb-4">
               <Image
                 src="/spider.png"
                 alt="SpiderChat"
                 width={128}
                 height={128}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain mix-blend-screen drop-shadow-[4px_4px_0_rgba(0,0,0,1)]"
               />
             </span>
             <GlitchText
@@ -276,32 +290,19 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* Multiverse Scenarios Section */}
-          <section className="mt-32 mb-20 w-full text-left">
-            <div className="flex justify-start flex-wrap gap-4 mb-12">
-              <GlitchText text="CANON" textColorClass="text-foreground" className="text-5xl md:text-6xl" />
-              <GlitchText text="EVENTS" textColorClass="text-spider-red" className="text-5xl md:text-6xl" />
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { title: "Study Groups (Earth-1610)", icon: "📚", color: "bg-yellow-400" },
-                { title: "Gaming (Earth-42)", icon: "🎮", color: "bg-purple-500" },
-                { title: "Alchemax Events", icon: "🏢", color: "bg-green-500" },
-                { title: "Spider-Society Comm", icon: "🕸️", color: "bg-blue-500" }
-              ].map((useCase, i) => (
-                <motion.div
-                  key={i}
-                  whileHover={{ y: -5 }}
-                  className={`${useCase.color} p-4 comic-panel border-black text-black`}
-                >
-                  <div className="text-4xl mb-2">{useCase.icon}</div>
-                  <h4 className="font-bebas text-xl">{useCase.title}</h4>
-                </motion.div>
-              ))}
-            </div>
-          </section>
+
+
+          {/* NEW EXPANDED SECTIONS */}
+          <ExploreMultiverse />
+          <LiveActivityFeed />
+          <FeaturesComicGrid />
+          <MomentsAlive />
+          <SpiderChatNumbers />
+          <CommunityTestimonials />
         </div>
       </main>
+      
+      <FinalCTA />
 
       {/* Cinematic SpiderChat Footer */}
       <Footer />

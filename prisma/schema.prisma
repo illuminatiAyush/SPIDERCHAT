@@ -43,8 +43,8 @@ model FriendRequest {
   senderId   String
   receiverId String
 
-  sender      User @relation("Sender", fields: [senderId], references: [id])
-  receiver    User @relation("Receiver", fields: [receiverId], references: [id])
+  sender      User @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   status      String @default("pending")
 
@@ -62,6 +62,9 @@ model Message {
   deleted     Boolean  @default(false)
   editedAt    DateTime?
   attachments Json?    @default("[]")
+  replyToId   String?
+  replyTo     Message? @relation("RoomReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     Message[] @relation("RoomReplies")
   createdAt   DateTime @default(now())
 
   @@index([roomId])

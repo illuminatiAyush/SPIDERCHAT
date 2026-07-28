@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "SpiderChat",
   description: "Enter the Multiverse of Conversations.",
   icons: {
-    icon: "/img.png",
+    icon: "/spider.png",
   },
 };
 

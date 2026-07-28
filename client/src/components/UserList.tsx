@@ -1,11 +1,13 @@
 "use client";
 
+import React, { useState } from "react";
 import { Users as UsersIcon, MoreVertical, ShieldAlert, VolumeX, Volume2, Crown } from "lucide-react";
-import { useState } from "react";
 import { socket } from "@/lib/socket";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export interface RoomUser {
+  id?: string;
   socketId: string;
   username: string;
   isOwner: boolean;
@@ -15,9 +17,10 @@ export interface RoomUser {
 interface UserListProps {
   users: RoomUser[];
   roomCode: string;
+  isDarkMode?: boolean;
 }
 
-export default function UserList({ users, roomCode }: UserListProps) {
+const UserList = ({ users, roomCode, isDarkMode }: UserListProps) => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const currentUser = users.find(u => u.socketId === socket.id);
@@ -56,7 +59,12 @@ export default function UserList({ users, roomCode }: UserListProps) {
         {users.map((user) => (
           <div 
             key={user.socketId}
-            className={`bg-white border-2 border-black p-2 font-fredoka font-bold text-sm text-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-colors relative flex items-center justify-between group ${user.socketId === socket.id ? 'bg-spider-blue/10 border-spider-blue' : 'hover:bg-spider-red hover:text-white'}`}
+            className={cn(
+              "border-2 border-black p-2 font-fredoka font-bold text-sm shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-colors relative flex items-center justify-between group",
+              user.socketId === socket.id 
+                ? (isDarkMode ? "bg-spider-blue/20 border-spider-blue text-spider-white" : "bg-spider-blue/10 border-spider-blue text-black")
+                : (isDarkMode ? "bg-[#222] text-spider-white hover:bg-spider-red hover:text-white" : "bg-white text-black hover:bg-spider-red hover:text-white")
+            )}
           >
             <div className="flex items-center gap-2 min-w-0">
               {user.isOwner && (
@@ -136,3 +144,5 @@ export default function UserList({ users, roomCode }: UserListProps) {
     </div>
   );
 }
+
+export default React.memo(UserList);

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { rateLimit } from '@/lib/rate-limit';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   try {
     // 1. Rate Limiting (5 requests per 15 minutes per IP)
