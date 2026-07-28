@@ -71,6 +71,14 @@ export default function RoomPage() {
   };
 
   useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }, [isDarkMode]);
+
+  useEffect(() => {
     if (countdown === null) return;
     if (countdown <= 0) {
       const timer = setTimeout(() => setCountdown(null), 1000); // fade out
@@ -311,8 +319,8 @@ export default function RoomPage() {
         onToggleDarkMode={toggleDarkMode}
       />
       
-      <div className={cn("flex-1 flex flex-col md:flex-row gap-0 md:gap-4 overflow-hidden relative", isDarkMode ? "bg-[#0B0B0B]" : "")}>
-        <div className={cn("flex-1 flex flex-col overflow-hidden comic-panel-mobile md:comic-panel", isDarkMode ? "bg-[#141414] text-spider-white border-spider-black" : "bg-spider-white")}>
+      <div className={cn("flex-1 flex flex-col md:flex-row gap-0 md:gap-4 overflow-hidden relative", isDarkMode ? "bg-[#151515]" : "")}>
+        <div className={cn("flex-1 flex flex-col overflow-hidden comic-panel-mobile md:comic-panel", isDarkMode ? "bg-[#0F0F10] text-spider-white border-[#232326]" : "bg-spider-white")}>
           <ChatWindow 
             messages={messages} 
             currentUserId={currentUser?.id}
@@ -353,7 +361,7 @@ export default function RoomPage() {
           )}
         </div>
         
-        <div className={cn("hidden md:block w-72 comic-panel overflow-hidden", isDarkMode ? "bg-[#141414] border-spider-black" : "bg-spider-white")}>
+        <div className={cn("hidden md:block w-72 comic-panel overflow-hidden", isDarkMode ? "bg-[#151515] border-[#232326]" : "bg-spider-white")}>
           <UserList users={users} roomCode={roomCode} isDarkMode={isDarkMode} />
         </div>
       </div>

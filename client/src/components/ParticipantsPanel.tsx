@@ -35,8 +35,8 @@ export default function ParticipantsPanel({ participants, currentUsername, isOpe
   const hiddenCount = participants.length > 8 ? participants.length - 8 : 0;
 
   const PanelContent = () => (
-    <div className={cn("flex flex-col h-full", isDarkMode ? "bg-[#141414] border-l-2 border-black" : "bg-spider-white")}>
-      <div className={cn("p-3 border-b-2 border-black flex justify-between items-center", isDarkMode ? "bg-black text-spider-white" : "bg-spider-black text-spider-white")}>
+    <div className={cn("flex flex-col h-full", isDarkMode ? "bg-[#1B1B1D] border-l-2 border-[#232326]" : "bg-spider-white")}>
+      <div className={cn("p-3 border-b-2 flex justify-between items-center", isDarkMode ? "bg-[#1B1B1D] border-[#232326] text-white" : "bg-spider-black border-black text-spider-white")}>
         <h3 className="font-bebas text-lg md:text-xl tracking-wider flex items-center gap-2">
           <UsersIcon size={18} />
           MULTIVERSE ({participants.length})
@@ -64,8 +64,8 @@ export default function ParticipantsPanel({ participants, currentUsername, isOpe
                 className={cn(
                   "flex items-center gap-2 p-2 font-fredoka font-medium text-sm transition-colors border-2",
                   isMe 
-                    ? (isDarkMode ? "bg-spider-blue/20 border-spider-blue text-spider-white" : "bg-spider-blue/10 border-spider-blue text-black")
-                    : (isDarkMode ? "bg-[#222] border-transparent text-spider-white hover:bg-spider-black hover:border-black" : "bg-transparent border-transparent text-black hover:bg-black/5 hover:border-black/10")
+                    ? (isDarkMode ? "bg-[#232326] border-spider-blue border-l-4 text-white" : "bg-spider-blue/10 border-spider-blue border-l-4 text-black")
+                    : (isDarkMode ? "bg-transparent border-transparent text-[#A1A1AA] hover:bg-[#232326] hover:text-white" : "bg-transparent border-transparent text-black hover:bg-black/5 hover:border-black/10")
                 )}
               >
                 <div className="flex items-center gap-2 overflow-hidden">
@@ -88,7 +88,7 @@ export default function ParticipantsPanel({ participants, currentUsername, isOpe
                       {isMe && <span className="text-[10px] text-spider-red uppercase tracking-wider font-bebas">(YOU)</span>}
                     </span>
                     
-                    <span className={cn("font-bebas text-[11px] flex items-center gap-1 uppercase tracking-wider", isDarkMode ? "text-spider-white/60" : "text-spider-black/60")}>
+                    <span className={cn("font-bebas text-[11px] flex items-center gap-1 uppercase tracking-wider", isDarkMode ? "text-[#A1A1AA]" : "text-spider-black/60")}>
                       {p.isOwner ? (
                         <><Crown size={10} className="text-yellow-500" /> 🕷 Creator</>
                       ) : p.isAuthenticated ? (

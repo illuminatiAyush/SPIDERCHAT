@@ -43,7 +43,7 @@ const MessageBubble = ({ message, isOwn, onReply, isDarkMode }: MessageBubblePro
       <div className="flex justify-center my-2" id={message.id ? `message-${message.id}` : undefined}>
         <span className={cn(
           "px-3 py-1 text-xs font-bebas uppercase tracking-wider skew-x-12 border-2",
-          isDarkMode ? "bg-[#141414] text-spider-white border-spider-black" : "bg-spider-black text-foreground border-spider-white"
+          isDarkMode ? "bg-[#1B1B1D] text-[#F3F4F6] border-[#232326]" : "bg-spider-black text-foreground border-spider-white"
         )}>
           {message.text}
         </span>
@@ -67,14 +67,14 @@ const MessageBubble = ({ message, isOwn, onReply, isDarkMode }: MessageBubblePro
         isOwn ? "self-end items-end" : "self-start items-start"
       )}
     >
-      <span className={cn("text-xs font-bebas mb-1 px-1", isDarkMode ? "text-spider-white/60" : "text-foreground/60")}>
+      <span className={cn("text-xs font-bebas mb-1 px-1", isDarkMode ? "text-[#A1A1AA]" : "text-foreground/60")}>
         {isOwn ? "YOU" : message.username.toUpperCase()} • {message.timestamp}
       </span>
       
       <div className={cn(
-        "relative p-3 border-4 border-black font-fredoka font-bold text-foreground group",
+        "relative p-3 border-4 border-black font-fredoka font-bold group",
         isOwn 
-          ? "bg-spider-red rounded-l-2xl rounded-tr-2xl shadow-[4px_4px_0_rgba(0,0,0,1)]" 
+          ? "bg-spider-red rounded-l-2xl rounded-tr-2xl shadow-[4px_4px_0_rgba(0,0,0,1)] text-white" 
           : "bg-spider-blue rounded-r-2xl rounded-tl-2xl shadow-[-4px_4px_0_rgba(0,0,0,1)] text-white"
       )}>
         {/* Desktop Reply Button */}
@@ -95,9 +95,8 @@ const MessageBubble = ({ message, isOwn, onReply, isDarkMode }: MessageBubblePro
             onClick={handleReplyClick}
             className={cn(
               "mb-2 px-3 py-2 rounded-md text-xs border-2 cursor-pointer transition-colors hover:opacity-80 active:scale-[0.98]",
-              isOwn 
-                ? "bg-black/20 border-black/40 text-foreground/90" 
-                : "bg-black/20 border-white/30 text-white/90"
+              isDarkMode ? "bg-[#232326] border-[#333333] text-white/90" : 
+              (isOwn ? "bg-black/20 border-black/40 text-foreground/90" : "bg-black/20 border-white/30 text-white/90")
             )}
           >
             <span className="font-bebas text-[11px] uppercase block mb-1">

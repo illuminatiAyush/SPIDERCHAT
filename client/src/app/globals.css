@@ -330,6 +330,27 @@ body {
   background: #ff4d4d;
 }
 
+/* Dark Theme Scrollbar */
+.dark-theme ::-webkit-scrollbar {
+  width: 6px; /* Thinner */
+}
+
+.dark-theme ::-webkit-scrollbar-track {
+  background: #0F0F10; /* Match main chat background */
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: rgba(226, 54, 54, 0.4); /* Muted, semi-transparent red */
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(226, 54, 54, 0.6); /* Soft glow */
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(226, 54, 54, 0.7);
+  box-shadow: 0 0 15px rgba(226, 54, 54, 0.8);
+}
+
 /* Mobile: always show reply button since there's no hover */
 @media (max-width: 768px) {
   .group button[aria-label="Reply to this message"] {

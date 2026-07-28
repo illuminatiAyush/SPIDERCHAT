@@ -61,7 +61,7 @@ export default function RoomHeader({ roomCode, userCount, isOwner, onOpenAdmin, 
   };
 
   return (
-    <header className="flex flex-col md:flex-row items-center justify-between bg-spider-white p-3 md:p-4 comic-panel z-20 gap-3 md:gap-0">
+    <header className={cn("flex flex-col md:flex-row items-center justify-between p-3 md:p-4 comic-panel z-20 gap-3 md:gap-0", isDarkMode ? "bg-[#1B1B1D] border-b-4 border-[#232326] text-white" : "bg-spider-white")}>
       <div className="flex items-center gap-3 w-full md:w-auto">
         <button
           type="button"
@@ -121,10 +121,10 @@ export default function RoomHeader({ roomCode, userCount, isOwner, onOpenAdmin, 
               whileTap={{ scale: 0.95 }}
               onClick={onToggleDarkMode}
               className={cn(
-                "p-2 md:p-3 border-2 border-black transition-colors flex items-center justify-center",
+                "p-2 md:p-3 border-2 transition-colors flex items-center justify-center",
                 isDarkMode 
-                  ? "bg-[#141414] text-spider-white shadow-[2px_2px_0_0_rgba(255,255,255,1)] border-spider-white" 
-                  : "bg-spider-white text-spider-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-gray-100"
+                  ? "bg-[#232326] text-spider-white shadow-[2px_2px_0_0_rgba(255,255,255,1)] border-[#333333]" 
+                  : "bg-spider-white text-spider-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-gray-100 border-black"
               )}
               title="Toggle Dark Mode"
             >

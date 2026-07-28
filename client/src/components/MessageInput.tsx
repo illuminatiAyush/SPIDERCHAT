@@ -109,7 +109,7 @@ export default function MessageInput({ roomCode, username, replyingTo, onCancelR
   }, [replyingTo]);
 
   return (
-    <div className="p-3 md:p-4 border-t-4 border-black bg-spider-white">
+    <div className={cn("p-3 md:p-4 border-t-4", isDarkMode ? "bg-[#1B1B1D] border-[#232326]" : "bg-spider-white border-black")}>
       {/* Reply preview banner */}
       <AnimatePresence>
         {replyingTo && (
@@ -117,13 +117,13 @@ export default function MessageInput({ roomCode, username, replyingTo, onCancelR
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-2 flex items-center gap-2 px-3 py-2 bg-spider-black/5 border-l-4 border-spider-red rounded-r-md overflow-hidden"
+            className={cn("mb-2 flex items-center gap-2 px-3 py-2 border-l-4 border-spider-red rounded-r-md overflow-hidden", isDarkMode ? "bg-[#232326] text-white" : "bg-spider-black/5")}
           >
             <div className="flex-1 min-w-0">
               <span className="text-[10px] font-bebas text-spider-red uppercase block">
                 Replying to {replyingTo.username}
               </span>
-              <span className="text-xs font-fredoka text-spider-black/70 truncate block">
+              <span className={cn("text-xs font-fredoka truncate block", isDarkMode ? "text-white" : "text-spider-black/70")}>
                 {replyingTo.text}
               </span>
             </div>
@@ -147,7 +147,7 @@ export default function MessageInput({ roomCode, username, replyingTo, onCancelR
           placeholder={replyingTo ? `Reply to ${replyingTo.username}...` : "Message..."}
           className={cn(
             "flex-1 px-4 py-3 md:py-2 border-4 font-fredoka focus:outline-none focus:ring-0 text-base md:text-sm resize-none overflow-y-auto min-h-[48px] max-h-[180px]",
-            isDarkMode ? "bg-[#141414] text-spider-white border-[#141414]" : "bg-white text-spider-black border-black"
+            isDarkMode ? "bg-[#232326] text-white border-[#333333] placeholder-[#A1A1AA]" : "bg-white text-spider-black border-black"
           )}
           autoComplete="off"
           rows={1}

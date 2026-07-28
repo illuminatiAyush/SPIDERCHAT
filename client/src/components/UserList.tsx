@@ -49,7 +49,7 @@ const UserList = ({ users, roomCode, isDarkMode }: UserListProps) => {
   };
 
   return (
-    <div className="h-full flex flex-col p-4 halftone-bg-dark">
+    <div className={cn("h-full flex flex-col p-4", isDarkMode ? "bg-[#1B1B1D]" : "halftone-bg-dark")}>
       <h3 className="font-bebas text-2xl text-spider-red flex items-center gap-2 mb-6 border-b-2 border-black pb-2">
         <UsersIcon size={24} />
         MULTIVERSE ({users.length}/100)
@@ -60,10 +60,10 @@ const UserList = ({ users, roomCode, isDarkMode }: UserListProps) => {
           <div 
             key={user.socketId}
             className={cn(
-              "border-2 border-black p-2 font-fredoka font-bold text-sm shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-colors relative flex items-center justify-between group",
+              "p-2 flex items-center justify-between border-2 transition-colors comic-shadow-sm group",
               user.socketId === socket.id 
-                ? (isDarkMode ? "bg-spider-blue/20 border-spider-blue text-spider-white" : "bg-spider-blue/10 border-spider-blue text-black")
-                : (isDarkMode ? "bg-[#222] text-spider-white hover:bg-spider-red hover:text-white" : "bg-white text-black hover:bg-spider-red hover:text-white")
+                ? (isDarkMode ? "bg-[#232326] border-spider-blue border-l-4 text-white" : "bg-spider-blue/10 border-spider-blue border-l-4 text-black")
+                : (isDarkMode ? "bg-transparent border-transparent text-[#A1A1AA] hover:bg-[#232326] hover:text-white" : "bg-white border-black text-black hover:bg-spider-red hover:text-white")
             )}
           >
             <div className="flex items-center gap-2 min-w-0">
