@@ -43,7 +43,6 @@ export async function POST(req: Request) {
     if (search) {
       whereClause.OR = [
         { senderName: { contains: search, mode: 'insensitive' } },
-        { messageContent: { contains: search, mode: 'insensitive' } },
         { roomId: { contains: search, mode: 'insensitive' } },
         { conversationId: { contains: search, mode: 'insensitive' } },
       ];

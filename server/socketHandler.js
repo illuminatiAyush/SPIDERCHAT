@@ -128,18 +128,7 @@ module.exports = (io) => {
       // Legacy support for existing components
       io.to(roomCode).emit('user_list', users);
       
-      // Send message history to the joining user
-      if (room && room.messages) {
-        // Find the user's earliest join time to restrict history
-        let joinTime = Date.now();
-        const userData = room.users.get(socket.id);
-        if (userData && userData.joinedAt) joinTime = userData.joinedAt;
-        
-        // Filter messages so new users don't see history prior to joining
-        const filteredMessages = room.messages.filter(m => m.serverTime >= joinTime);
-        console.log(`[Socket] Sending ${filteredMessages.length} messages (out of ${room.messages.length}) to ${username}`);
-        socket.emit('message_history', filteredMessages);
-      }
+
       
       // Broadcast join message
       socket.to(roomCode).emit('receive_message', {
@@ -215,19 +204,7 @@ module.exports = (io) => {
         // Check in memory first
         let originalMsg = room.messages.find(m => m.id === replyTo.id);
         
-        // If not in memory, check database
-        if (!originalMsg) {
-          try {
-            const dbMsg = await prisma.message.findUnique({
-              where: { id: replyTo.id }
-            });
-            if (dbMsg && dbMsg.roomId === roomCode && !dbMsg.deleted) {
-              originalMsg = { id: dbMsg.id, username: dbMsg.senderName, text: dbMsg.content };
-            }
-          } catch (err) {
-            console.error('[Socket] Failed to validate reply against DB:', err);
-          }
-        }
+
 
         if (originalMsg) {
           message.replyTo = {
@@ -251,38 +228,24 @@ module.exports = (io) => {
         const isGuest = userId === 'Unknown' || userId.startsWith('anon_');
         const dbSenderId = !isGuest ? userId : null;
         
-        prisma.message.create({
+        const isDM = roomCode.includes('_');
+        
+        prisma.moderationLog.create({
           data: {
-            id: messageId,
-            content: text,
+            messageId: messageId,
+            source: isDM ? 'DIRECT' : 'ROOM',
+            roomId: roomCode,
             senderId: dbSenderId,
             senderName: username || 'Anonymous',
-            roomId: roomCode,
-            type: 'user',
-            replyToId: message.replyToId || null
+            messageType: 'user',
+            isGuest: isGuest,
+            isAuthenticated: !isGuest
           }
-        }).then((persistedMessage) => {
-          // Determine if it's a DM (roomCode contains '_')
-          const isDM = roomCode.includes('_');
-          
-          return prisma.moderationLog.create({
-            data: {
-              messageId: persistedMessage.id,
-              source: isDM ? 'DIRECT' : 'ROOM',
-              roomId: roomCode,
-              senderId: dbSenderId,
-              senderName: username || 'Anonymous',
-              messageContent: text,
-              messageType: 'user',
-              isGuest: isGuest,
-              isAuthenticated: !isGuest
-            }
-          });
         }).then((modLog) => {
           io.to('admin_dashboard').emit('moderation:new', modLog);
-        }).catch(err => console.error('[Socket] Failed to persist room message or mod log:', err));
+        }).catch(err => console.error('[Socket] Failed to persist mod log:', err));
       } catch (err) {
-        console.error('[Socket] Error triggering message persistence:', err);
+        console.error('[Socket] Error triggering moderation persistence:', err);
       }
     });
 
@@ -527,7 +490,6 @@ module.exports = (io) => {
                 senderId: userId,
                 senderName: username,
                 recipientId: receiverId,
-                messageContent: content,
                 messageType: type || 'text',
                 isGuest: false,
                 isAuthenticated: true

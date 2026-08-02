@@ -508,7 +508,7 @@ export default function ConversationPage() {
                     className={`relative px-4 py-2.5 rounded-2xl ${
                       isMine
                         ? "bg-spider-blue text-white rounded-br-md border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
-                        : "bg-spider-white text-foreground rounded-bl-md border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                        : "bg-spider-white text-black rounded-bl-md border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
                     }`}
                   >
                     {/* Image message */}
@@ -532,7 +532,7 @@ export default function ConversationPage() {
                     >
                       <span
                         className={`text-[10px] font-fredoka ${
-                          isMine ? "text-white/50" : "text-foreground/40"
+                          isMine ? "text-white/50" : "text-black/50"
                         }`}
                       >
                         {formatMessageTime(msg.createdAt)}
@@ -540,7 +540,7 @@ export default function ConversationPage() {
                       {msg.editedAt && (
                         <span
                           className={`text-[10px] italic ${
-                            isMine ? "text-white/40" : "text-foreground/30"
+                            isMine ? "text-white/40" : "text-black/40"
                           }`}
                         >
                           (edited)

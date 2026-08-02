@@ -142,7 +142,7 @@ export default function AdminDashboard() {
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="comic-panel bg-spider-black text-spider-black p-8 max-w-md w-full border-4 border-spider-red"
+          className="comic-panel bg-yellow-400 text-spider-black p-8 max-w-md w-full border-4 border-spider-red"
         >
           <div className="text-center mb-8">
             <ShieldAlert className="w-16 h-16 mx-auto text-spider-red mb-4" />
@@ -358,7 +358,6 @@ export default function AdminDashboard() {
                       <tr className="border-b-2 border-spider-white/20 text-spider-red font-bebas text-xl">
                         <th className="p-4">SOURCE</th>
                         <th className="p-4">SENDER</th>
-                        <th className="p-4 w-1/2">CONTENT</th>
                         <th className="p-4">DESTINATION (ROOM/DM)</th>
                         <th className="p-4">TIMESTAMP</th>
                         <th className="p-4">STATUS</th>
@@ -376,11 +375,6 @@ export default function AdminDashboard() {
                             {msg.senderName}
                             {msg.isGuest && <span className="ml-2 text-xs font-mono text-spider-black/50">(GUEST)</span>}
                           </td>
-                          <td className="p-4 break-words">
-                            {msg.messageContent}
-                            {msg.status === 'DELETED' && <span className="ml-2 text-spider-red font-bold text-xs">[DELETED]</span>}
-                            {msg.status === 'EDITED' && <span className="ml-2 text-gray-500 font-bold text-xs">[EDITED]</span>}
-                          </td>
                           <td className="p-4 font-mono text-sm text-gray-400">
                             {msg.source === 'ROOM' ? msg.roomId : `DM: ${msg.conversationId}`}
                           </td>
@@ -390,7 +384,7 @@ export default function AdminDashboard() {
                       ))}
                       {messages.length === 0 && (
                         <tr>
-                          <td colSpan={6} className="p-8 text-center text-gray-500">NO LOGS FOUND</td>
+                          <td colSpan={5} className="p-8 text-center text-gray-500">NO LOGS FOUND</td>
                         </tr>
                       )}
                     </tbody>

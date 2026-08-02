@@ -28,7 +28,8 @@ class RoomManager {
           ...room,
           users: Array.from(room.users.entries()), // Convert Map to Array for JSON
           mutedSockets: Array.from(room.mutedSockets),
-          bannedSockets: Array.from(room.bannedSockets)
+          bannedSockets: Array.from(room.bannedSockets),
+          messages: [] // Never persist messages to disk
         };
       }
       fs.writeFileSync(this.persistencePath, JSON.stringify(data, null, 2));
@@ -48,6 +49,7 @@ class RoomManager {
           room.users = new Map();
           room.mutedSockets = new Set(room.mutedSockets || []);
           room.bannedSockets = new Set(room.bannedSockets || []);
+          room.messages = []; // Ensure messages are wiped upon restart
           room.ownerSocketId = null; // No one is owner if everyone disconnected
           this.rooms.set(code, room);
         }
