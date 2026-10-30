@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/spider.png",
   },
+  verification: {
+    google: "googleba862447bb8adbe6",
+  },
 };
 
 export default function RootLayout({
