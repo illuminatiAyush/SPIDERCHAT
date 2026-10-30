@@ -6,14 +6,17 @@ export async function POST(req: Request) {
   try {
     const { username, password } = await req.json();
 
+    const expectedUser = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
+    const expectedPass = process.env.ADMIN_PASSWORD || 'SpiderVerseAdmin2026!';
+
     const normalizedUsername = (username || '').trim().toLowerCase();
 
-    if (normalizedUsername !== 'admin' || password !== '123456') {
+    if (normalizedUsername !== expectedUser || password !== expectedPass) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
     // Create an admin token
-    const token = signToken({ id: 'admin', role: 'admin' });
+    const token = signToken({ id: 'admin', username: 'admin', role: 'admin' });
 
     // Set cookie
     const cookieStore = await cookies();

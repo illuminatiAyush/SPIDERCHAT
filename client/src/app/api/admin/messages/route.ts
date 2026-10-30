@@ -25,8 +25,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     if (!isAuthenticated) {
       const { username, password } = body;
+      const expectedUser = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
+      const expectedPass = process.env.ADMIN_PASSWORD || 'SpiderVerseAdmin2026!';
       const normalizedUsername = (username || '').trim().toLowerCase();
-      if (normalizedUsername !== 'admin' || password !== '123456') {
+      if (normalizedUsername !== expectedUser || password !== expectedPass) {
         return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
       }
       isAuthenticated = true;

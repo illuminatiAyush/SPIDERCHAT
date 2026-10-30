@@ -47,7 +47,7 @@ module.exports = (io) => {
   io.use((socket, next) => {
     try {
       const cookies = cookie.parse(socket.request.headers.cookie || '');
-      const token = cookies.token || cookies.auth_token || socket.handshake.auth?.token;
+      const token = cookies.token || cookies.auth_token || cookies.adminToken || socket.handshake.auth?.token;
 
       if (!token) {
         // Fallback to anonymous connection for room chats
@@ -63,6 +63,9 @@ module.exports = (io) => {
       }
 
       const decoded = jwt.verify(token, secret);
+      if (decoded && decoded.role === 'admin' && !decoded.username) {
+        decoded.username = 'admin';
+      }
       socket.user = decoded; // Attach verified user to socket
       next();
     } catch (err) {
@@ -89,12 +92,6 @@ module.exports = (io) => {
       userSockets.get(userId).add(socket.id);
       console.log(`[Socket] Tracked user ${userId}, total sockets: ${userSockets.get(userId).size}`);
     }
-
-    // ============= ADMIN DASHBOARD =============
-    socket.on('join_admin_dashboard', () => {
-      socket.join('admin_dashboard');
-      socket.emit('admin_live_users', Array.from(userSockets.keys()));
-    });
 
     // ============= ROOM CHAT (existing) =============
 
@@ -149,11 +146,14 @@ module.exports = (io) => {
     });
 
     socket.on('join_admin_dashboard', () => {
-      // Allow if user is admin (hardcoded 'admin' username check since no role column exists yet, or check a role if present)
-      if (socket.user && socket.user.username === 'admin') {
+      // Allow only verified admin tokens
+      if (socket.user && (socket.user.role === 'admin' || socket.user.username === 'admin')) {
         socket.join('admin_dashboard');
+        socket.emit('admin_live_users', Array.from(userSockets.keys()));
+        console.log(`[Socket] Admin dashboard joined securely by ${socket.user.username}`);
       } else {
-        console.warn(`[Socket] Unauthorized admin join attempt by ${username}`);
+        console.warn(`[Socket] Unauthorized admin join attempt by ${username} (${userId})`);
+        socket.emit('error_message', 'Unauthorized: Admin privileges required.');
       }
     });
 
@@ -422,6 +422,11 @@ module.exports = (io) => {
         
         if (!conversation) return;
         
+        // Authorization check: User must be a participant in this conversation (IDOR prevention)
+        if (!conversation.participants.some(p => p.id === userId)) {
+          return socket.emit('error_message', 'You are not a participant in this conversation.');
+        }
+        
         const receiver = conversation.participants.find(p => p.id !== userId);
         const receiverId = receiver ? receiver.id : userId; // fallback to self if self-DM
 
@@ -513,6 +518,7 @@ module.exports = (io) => {
           include: { participants: true }
         });
         if (!conversation) return;
+        if (!conversation.participants.some(p => p.id === userId)) return;
         const receiver = conversation.participants.find(p => p.id !== userId);
         if (!receiver) return;
         
@@ -538,6 +544,7 @@ module.exports = (io) => {
           include: { participants: true }
         });
         if (!conversation) return;
+        if (!conversation.participants.some(p => p.id === userId)) return;
         const receiver = conversation.participants.find(p => p.id !== userId);
         if (!receiver) return;
 
@@ -562,6 +569,7 @@ module.exports = (io) => {
           include: { participants: true }
         });
         if (!conversation) return;
+        if (!conversation.participants.some(p => p.id === userId)) return;
         const receiver = conversation.participants.find(p => p.id !== userId);
         if (!receiver) return;
 
@@ -582,6 +590,7 @@ module.exports = (io) => {
     });
 
     socket.on('dm_edit', ({ conversationId, messageId, content }) => {
+      if (checkRateLimit(userId)) return;
       const receiverId = conversationId;
       const receiverSockets = userSockets.get(receiverId);
       if (receiverSockets) {
@@ -597,6 +606,7 @@ module.exports = (io) => {
     });
 
     socket.on('dm_delete', ({ conversationId, messageId }) => {
+      if (checkRateLimit(userId)) return;
       const receiverId = conversationId;
       const receiverSockets = userSockets.get(receiverId);
       if (receiverSockets) {
@@ -611,6 +621,7 @@ module.exports = (io) => {
 
     // ============= NOTIFICATIONS =============
     socket.on('send_notification', ({ receiverId, type, message }) => {
+      if (checkRateLimit(userId)) return;
       console.log(`[Socket] Sending notification to ${receiverId}`);
       const receiverSockets = userSockets.get(receiverId);
       if (receiverSockets) {

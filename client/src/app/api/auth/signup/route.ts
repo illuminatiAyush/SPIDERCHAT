@@ -26,6 +26,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Username must be alphanumeric and up to 30 characters' }, { status: 400 });
     }
 
+    const reservedNames = ['admin', 'administrator', 'system', 'spiderchat', 'moderator', 'root'];
+    if (reservedNames.includes(username.toLowerCase())) {
+      return NextResponse.json({ error: 'This username is reserved' }, { status: 400 });
+    }
+
     if (!PASSWORD_REGEX.test(password)) {
       return NextResponse.json({ error: 'Password must be at least 8 characters long, contain 1 uppercase letter, 1 number, and 1 special character' }, { status: 400 });
     }

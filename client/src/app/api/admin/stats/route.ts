@@ -32,7 +32,10 @@ async function handleAuthAndFetch(req: Request) {
     if (!isAuthenticated && req.method === 'POST') {
       try {
         const body = await req.json();
-        if (body.username === 'admin' && body.password === '123456') {
+        const expectedUser = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
+        const expectedPass = process.env.ADMIN_PASSWORD || 'SpiderVerseAdmin2026!';
+        const normalizedUsername = (body.username || '').trim().toLowerCase();
+        if (normalizedUsername === expectedUser && body.password === expectedPass) {
           isAuthenticated = true;
         }
       } catch (e) {
