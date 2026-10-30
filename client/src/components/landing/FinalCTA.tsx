@@ -10,23 +10,30 @@ export default function FinalCTA() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleCreateRoom = async () => {
+  const handleCreateRoom = () => {
     setIsCreating(true);
-    try {
-      const response = await fetch("/api/conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isRoom: true }),
-      });
 
-      if (!response.ok) throw new Error("Failed to create room");
+    const heroNames = ["Peter", "Miles", "Gwen", "Miguel", "Pavitr", "Hobie", "SpiderNoir", "PennyParker"];
+    const randomHero = heroNames[Math.floor(Math.random() * heroNames.length)] + "_" + Math.floor(100 + Math.random() * 900);
+    const stored = typeof window !== 'undefined' ? sessionStorage.getItem("spiderchat_username") : null;
+    const alias = stored || randomHero;
 
-      const data = await response.json();
-      router.push(`/room/${data.roomCode}`);
-    } catch (error) {
-      console.error(error);
-      setIsCreating(false);
+    if (typeof window !== 'undefined') {
+      let guestId = sessionStorage.getItem("spiderchat_guest_id");
+      if (!guestId) {
+        guestId = `anon_${Math.random().toString(36).substring(2, 11)}`;
+        sessionStorage.setItem("spiderchat_guest_id", guestId);
+      }
+      sessionStorage.setItem("spiderchat_username", alias);
     }
+
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let roomCode = "";
+    for (let i = 0; i < 6; i++) {
+      roomCode += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    router.push(`/room/${roomCode}`);
   };
 
   return (

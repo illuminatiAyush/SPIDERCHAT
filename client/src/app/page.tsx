@@ -31,43 +31,36 @@ export default function LandingPage() {
 
   const handleCreateRoom = () => {
     setIsCreating(true);
-    // Connect as anonymous or authenticated
-    const providedUsername = user?.username || "Host_" + Math.floor(Math.random() * 1000);
-    
+    const heroNames = [
+      "Peter", "Miles", "Gwen", "Miguel", "Pavitr",
+      "Hobie", "SpiderNoir", "PennyParker", "SpiderHam", "Spectacular"
+    ];
+    const randomHero =
+      heroNames[Math.floor(Math.random() * heroNames.length)] +
+      "_" +
+      Math.floor(100 + Math.random() * 900);
+
+    const providedUsername =
+      user?.username || sessionStorage.getItem("spiderchat_username") || randomHero;
+
     let guestId = sessionStorage.getItem("spiderchat_guest_id");
     if (!guestId) {
       guestId = `anon_${Math.random().toString(36).substring(2, 11)}`;
       sessionStorage.setItem("spiderchat_guest_id", guestId);
     }
-    
-    socket.auth = { username: providedUsername, userId: user?.id, guestId };
 
-    if (socket.connected) {
-      socket.emit("create_room");
-    } else {
-      socket.once("connect", () => {
-        socket.emit("create_room");
-      });
-      socket.connect();
+    sessionStorage.setItem("spiderchat_username", providedUsername);
+
+    // Instant code generation (0ms network delay)
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let roomCode = "";
+    for (let i = 0; i < 6; i++) {
+      roomCode += chars.charAt(Math.floor(Math.random() * chars.length));
     }
+
+    // Warp directly to the room!
+    router.push(`/room/${roomCode}`);
   };
-
-  useEffect(() => {
-    socket.on("room_created", (roomCode) => {
-      router.push(`/join?code=${roomCode}`);
-    });
-
-    socket.on("connect_error", (err) => {
-      console.error("Socket connection failed:", err.message);
-      setIsCreating(false);
-      alert("Failed to connect to the server. Please try again.");
-    });
-
-    return () => {
-      socket.off("room_created");
-      socket.off("connect_error");
-    };
-  }, [router]);
 
   useEffect(() => {
     if (user && !loading) {

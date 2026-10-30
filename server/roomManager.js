@@ -17,25 +17,31 @@ class RoomManager {
   }
 
   saveToPersistence() {
-    try {
-      const dir = path.dirname(this.persistencePath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+    if (this._saveTimer) return;
+    this._saveTimer = setTimeout(() => {
+      this._saveTimer = null;
+      try {
+        const dir = path.dirname(this.persistencePath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        const data = {};
+        for (const [code, room] of this.rooms.entries()) {
+          data[code] = {
+            ...room,
+            users: Array.from(room.users.entries()), // Convert Map to Array for JSON
+            mutedSockets: Array.from(room.mutedSockets),
+            bannedSockets: Array.from(room.bannedSockets),
+            messages: [] // Never persist messages to disk
+          };
+        }
+        fs.writeFile(this.persistencePath, JSON.stringify(data, null, 2), (err) => {
+          if (err) console.error('Failed to save rooms to persistence:', err);
+        });
+      } catch (err) {
+        console.error('Failed to save rooms to persistence:', err);
       }
-      const data = {};
-      for (const [code, room] of this.rooms.entries()) {
-        data[code] = {
-          ...room,
-          users: Array.from(room.users.entries()), // Convert Map to Array for JSON
-          mutedSockets: Array.from(room.mutedSockets),
-          bannedSockets: Array.from(room.bannedSockets),
-          messages: [] // Never persist messages to disk
-        };
-      }
-      fs.writeFileSync(this.persistencePath, JSON.stringify(data, null, 2));
-    } catch (err) {
-      console.error('Failed to save rooms to persistence:', err);
-    }
+    }, 500);
   }
 
   loadFromPersistence() {
