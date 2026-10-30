@@ -41,9 +41,12 @@ export default function SupportPage() {
             <p className="font-fredoka text-lg mb-6">
               If your chat rooms are collapsing or you're experiencing severe lag in the multiverse continuum, don't panic. Our Web-Weavers are on standby to patch any anomalies.
             </p>
-            <button className="comic-button bg-spider-white text-spider-black w-full py-4 text-xl hover:bg-spider-red hover:text-white">
+            <Link 
+              href="/feedback" 
+              className="comic-button bg-spider-white text-spider-black w-full py-4 text-xl hover:bg-spider-red hover:text-white block text-center"
+            >
               REPORT AN ANOMALY
-            </button>
+            </Link>
           </motion.div>
 
           <motion.div 
@@ -55,15 +58,18 @@ export default function SupportPage() {
             <p className="font-fredoka text-lg mb-6">
               Forgot your login credentials? Can't access your encrypted dashboard? Send a distress signal to HQ and we'll help you recover your secret identity.
             </p>
-            <button className="comic-button bg-spider-black text-white w-full py-4 text-xl hover:bg-spider-blue">
-              SEND DISTRESS SIGNAL
-            </button>
+            <Link 
+              href="/forgot-password" 
+              className="comic-button bg-spider-black text-white w-full py-4 text-xl hover:bg-spider-blue block text-center"
+            >
+              RECOVER CREDENTIALS
+            </Link>
           </motion.div>
         </div>
         
-        <div className="mt-12 text-center bg-black/60 p-6 border-4 border-black rounded-xl backdrop-blur-sm">
+        <div className="mt-12 text-center bg-spider-white text-spider-black p-6 border-4 border-black rounded-xl comic-panel shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
            <h3 className="font-bebas text-3xl text-spider-black mb-2">DIRECT COMM-LINK</h3>
-           <p className="font-fredoka text-spider-black/80 text-lg">
+           <p className="font-fredoka text-spider-black/90 text-lg">
              For extreme emergencies, contact the Spider Society HQ at: <br/>
              <span className="text-spider-blue font-bold tracking-wider">SUPPORT@SPIDERCHAT.MULTIVERSE</span>
            </p>
