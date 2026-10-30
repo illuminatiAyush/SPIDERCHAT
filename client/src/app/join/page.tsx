@@ -57,9 +57,9 @@ function JoinForm() {
         animate={{ y: 0, opacity: 1 }}
         className="max-w-md w-full bg-spider-white p-8 comic-panel"
       >
-        <h2 className="text-5xl font-bebas text-spider-black mb-6 text-center transform -rotate-1 skew-x-[-6deg] drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+        <h1 className="text-5xl font-bebas text-spider-black mb-6 text-center transform -rotate-1 skew-x-[-6deg] drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
           MULTIVERSE <span className="text-spider-red">ENTRY</span>
-        </h2>
+        </h1>
 
         <form onSubmit={handleJoin} className="space-y-6">
           {loading ? (
@@ -134,9 +134,14 @@ function JoinForm() {
 export default function JoinPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex flex-col gap-6 items-center justify-center halftone-bg">
-        <LoadingAnimation size={300} text="LOADING DIMENSION..." />
-      </div>
+      <main className="min-h-screen relative flex items-center justify-center p-4 halftone-bg">
+        <div className="max-w-md w-full bg-spider-white p-8 comic-panel flex flex-col items-center">
+          <h1 className="text-5xl font-bebas text-spider-black mb-6 text-center transform -rotate-1 skew-x-[-6deg] drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+            MULTIVERSE <span className="text-spider-red">ENTRY</span>
+          </h1>
+          <LoadingAnimation size={240} text="LOADING DIMENSION..." />
+        </div>
+      </main>
     }>
       <JoinForm />
     </Suspense>

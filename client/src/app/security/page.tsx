@@ -20,11 +20,14 @@ export default function SecurityPage() {
       <div className="z-10 w-full max-w-4xl mt-16 md:mt-24">
         <div className="text-center mb-12">
           <Lock className="w-20 h-20 mx-auto text-spider-blue mb-4 drop-shadow-[4px_4px_0_rgba(0,0,0,1)]" />
-          <GlitchText 
-            text="SECURITY PROTOCOLS" 
-            textColorClass="text-spider-blue"
-            className="text-6xl md:text-8xl drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wider"
-          />
+          <h1 className="flex flex-col items-center">
+            <span className="sr-only">Security Protocols — SpiderChat Encryption & Safeguards</span>
+            <GlitchText 
+              text="SECURITY PROTOCOLS" 
+              textColorClass="text-spider-blue"
+              className="text-6xl md:text-8xl drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wider"
+            />
+          </h1>
         </div>
 
         <motion.div 

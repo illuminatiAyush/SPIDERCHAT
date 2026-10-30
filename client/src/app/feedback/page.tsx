@@ -60,11 +60,14 @@ export default function FeedbackPage() {
       <div className="z-10 w-full max-w-3xl mt-16 md:mt-24">
         <div className="text-center mb-12">
           <MessageSquareWarning className="w-20 h-20 mx-auto text-[#39FF14] mb-4 drop-shadow-[4px_4px_0_rgba(0,0,0,1)]" />
-          <GlitchText 
-            text="DAILY BUGLE TIP LINE" 
-            textColorClass="text-[#39FF14]"
-            className="text-5xl md:text-7xl drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wider"
-          />
+          <h1 className="flex flex-col items-center">
+            <span className="sr-only">Daily Bugle Tip Line — SpiderChat Feedback & Bug Reports</span>
+            <GlitchText 
+              text="DAILY BUGLE TIP LINE" 
+              textColorClass="text-[#39FF14]"
+              className="text-5xl md:text-7xl drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-wider"
+            />
+          </h1>
           <p className="font-fredoka text-xl text-foreground mt-4 bg-black/50 px-4 py-2 rounded-xl inline-block border-2 border-white/20">
             Got pictures of Spider-Man? Or just some feedback for the app?
           </p>

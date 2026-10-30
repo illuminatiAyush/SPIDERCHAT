@@ -19,13 +19,14 @@ import FeaturesComicGrid from "@/components/landing/FeaturesComicGrid";
 import MomentsAlive from "@/components/landing/MomentsAlive";
 import SpiderChatNumbers from "@/components/landing/SpiderChatNumbers";
 import CommunityTestimonials from "@/components/landing/CommunityTestimonials";
+import MultiverseFAQ from "@/components/landing/MultiverseFAQ";
 import FinalCTA from "@/components/landing/FinalCTA";
 
 export default function LandingPage() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const { user, loading, logout } = useAuth();
 
   const handleCreateRoom = () => {
@@ -75,23 +76,25 @@ export default function LandingPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    // 2-second splash screen on initial load
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2000);
-    return () => clearTimeout(timer);
+    // Show splash animation overlay on first visit per session
+    const seen = sessionStorage.getItem("spiderchat_seen_splash");
+    if (!seen) {
+      setShowSplash(true);
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        sessionStorage.setItem("spiderchat_seen_splash", "true");
+      }, 1800);
+      return () => clearTimeout(timer);
+    }
   }, []);
-
-  if (showSplash) {
-    return (
-      <div className="h-screen flex flex-col gap-6 items-center justify-center bg-spider-black halftone-bg w-full">
-        <LoadingAnimation size={300} text="ENTERING THE MULTIVERSE..." />
-      </div>
-    );
-  }
 
   return (
     <>
+      {showSplash && (
+        <div className="fixed inset-0 z-[9999] flex flex-col gap-6 items-center justify-center bg-spider-black halftone-bg w-full">
+          <LoadingAnimation size={300} text="ENTERING THE MULTIVERSE..." />
+        </div>
+      )}
       <main className="min-h-screen relative flex flex-col items-center justify-center p-4 overflow-x-hidden halftone-bg">
         {/* Auth Header */}
         <div className="absolute top-4 right-4 z-50 flex items-center gap-4">
@@ -167,22 +170,25 @@ export default function LandingPage() {
             <span className="relative h-24 w-24 md:h-32 md:w-32 flex-shrink-0 mb-4">
               <Image
                 src="/spider.png"
-                alt="SpiderChat"
+                alt="SpiderChat Logo"
                 width={128}
                 height={128}
                 className="h-full w-full object-contain mix-blend-screen drop-shadow-[4px_4px_0_rgba(0,0,0,1)]"
               />
             </span>
-            <GlitchText
-              text="SPIDERCHAT"
-              textColorClass="text-spider-red"
-              glitchVariants={[
-                "SPIDER//CHAT", "SP1D3R_CHAT", "SPIDER-CHAT", "SPIDΞRCHAT",
-                "S_P_I_D_E_R", "MULT1V3RSE_CHAT", "PETER_CHAT", "MILES_CHAT",
-                "GWEN_CHAT", "VENOM_CHAT", "2099_CHAT", "🕸️_CHAT"
-              ]}
-              className="text-7xl md:text-9xl mb-2 drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-widest"
-            />
+            <h1 className="flex flex-col items-center">
+              <span className="sr-only">SpiderChat — Real-Time Multiverse Chat & Ephemeral Rooms</span>
+              <GlitchText
+                text="SPIDERCHAT"
+                textColorClass="text-spider-red"
+                glitchVariants={[
+                  "SPIDER//CHAT", "SP1D3R_CHAT", "SPIDER-CHAT", "SPIDΞRCHAT",
+                  "S_P_I_D_E_R", "MULT1V3RSE_CHAT", "PETER_CHAT", "MILES_CHAT",
+                  "GWEN_CHAT", "VENOM_CHAT", "2099_CHAT", "🕸️_CHAT"
+                ]}
+                className="text-7xl md:text-9xl mb-2 drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-widest"
+              />
+            </h1>
             <AnimatedTagline />
           </motion.div>
 
@@ -299,6 +305,7 @@ export default function LandingPage() {
           <MomentsAlive />
           <SpiderChatNumbers />
           <CommunityTestimonials />
+          <MultiverseFAQ />
         </div>
       </main>
       

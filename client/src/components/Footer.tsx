@@ -252,6 +252,10 @@ const Footer = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-6 font-bebas text-lg text-foreground/40">
+            <Link href="/privacy-policy" className="hover:text-spider-red hover:underline hover:-translate-y-1 decoration-2 underline-offset-4 decoration-spider-red transition-all duration-300 flex items-center gap-1 cursor-pointer group">
+              <ShieldCheck size={14} className="group-hover:text-spider-red transition-colors" />
+              Privacy Policy
+            </Link>
             <Link href="/terms" className="hover:text-spider-red hover:underline hover:-translate-y-1 decoration-2 underline-offset-4 decoration-spider-red transition-all duration-300 flex items-center gap-1 cursor-pointer group">
               <FileText size={14} className="group-hover:text-spider-red transition-colors" />
               Terms of Service
@@ -260,14 +264,18 @@ const Footer = () => {
               <Shield size={14} className="group-hover:text-spider-red transition-colors" />
               Security
             </Link>
-            <a href="https://github.com/illuminatiAyush" target="_blank" rel="noopener noreferrer" className="hover:text-spider-red hover:underline hover:-translate-y-1 decoration-2 underline-offset-4 decoration-spider-red transition-all duration-300 flex items-center gap-1 cursor-pointer group">
-              <Github size={14} className="group-hover:text-spider-red transition-colors" />
-              GitHub
-            </a>
+            <Link href="/support" className="hover:text-spider-red hover:underline hover:-translate-y-1 decoration-2 underline-offset-4 decoration-spider-red transition-all duration-300 flex items-center gap-1 cursor-pointer group">
+              <UserCog size={14} className="group-hover:text-spider-red transition-colors" />
+              Support
+            </Link>
             <Link href="/status" className="hover:text-spider-red hover:underline hover:-translate-y-1 decoration-2 underline-offset-4 decoration-spider-red transition-all duration-300 flex items-center gap-1 cursor-pointer group">
               <Activity size={14} className="group-hover:text-spider-red transition-colors" />
               Status
             </Link>
+            <a href="https://github.com/illuminatiAyush/SPIDERCHAT" target="_blank" rel="noopener noreferrer" className="hover:text-spider-red hover:underline hover:-translate-y-1 decoration-2 underline-offset-4 decoration-spider-red transition-all duration-300 flex items-center gap-1 cursor-pointer group">
+              <Github size={14} className="group-hover:text-spider-red transition-colors" />
+              GitHub
+            </a>
           </div>
 
         </div>
